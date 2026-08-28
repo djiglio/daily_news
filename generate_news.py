@@ -29,7 +29,7 @@ def load_config():
 
 def fetch_rss_feed(url, max_items):
     logging.info(f"Fetching RSS: {url}")
-    feed = feedparser.parse(url)
+    feed = feedparser.parse(url, agent='Mozilla/5.0 (Windows NT 10.0; Win64; x64)')
     
     recent_entries = []
     now = datetime.utcnow()

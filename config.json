@@ -1,23 +1,37 @@
 {
   "categories": {
     "Top News": [
-      "https://www.ansa.it/sito/ansait_rss.xml"
+      "https://www.ansa.it/sito/ansait_rss.xml",
+      "https://www.repubblica.it/rss/homepage/rss2.0.xml",
+      "https://www.adnkronos.com/rss.xml",
+      "https://www.agi.it/rss"
     ],
     "Italia": [
-      "https://www.ansa.it/sito/notizie/cronaca/cronaca_rss.xml"
+      "https://www.ansa.it/sito/notizie/cronaca/cronaca_rss.xml",
+      "https://www.repubblica.it/rss/cronaca/rss2.0.xml",
+      "https://www.lastampa.it/rss/"
     ],
     "Mondo": [
-      "https://www.ansa.it/sito/notizie/mondo/mondo_rss.xml"
+      "https://www.ansa.it/sito/notizie/mondo/mondo_rss.xml",
+      "http://feeds.bbci.co.uk/news/world/rss.xml",
+      "http://rss.cnn.com/rss/edition_world.rss",
+      "https://www.theguardian.com/world/rss",
+      "https://rss.nytimes.com/services/xml/rss/nyt/World.xml"
     ],
     "Calcio & Sport": [
       "https://www.gazzetta.it/rss/calcio.xml",
-      "https://www.gazzetta.it/rss/juventus.xml"
+      "https://www.gazzetta.it/rss/juventus.xml",
+      "https://www.corrieredellosport.it/rss/calcio",
+      "https://sport.sky.it/rss/sport_calcio.xml"
     ],
     "Politica": [
-      "https://www.ansa.it/sito/notizie/politica/politica_rss.xml"
+      "https://www.ansa.it/sito/notizie/politica/politica_rss.xml",
+      "https://lespresso.it/feed/",
+      "https://www.repubblica.it/rss/politica/rss2.0.xml"
     ],
     "Economia": [
-      "https://www.ilsole24ore.com/rss/economia.xml"
+      "https://www.ilsole24ore.com/rss/economia.xml",
+      "https://www.repubblica.it/rss/economia/rss2.0.xml"
     ],
     "Attualità": [
       "https://www.ilpost.it/feed/"
