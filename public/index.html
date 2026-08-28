@@ -8,7 +8,7 @@
     <link rel="manifest" href="/manifest.json">
     <link rel="icon" type="image/jpeg" href="/icon.jpg">
     <link rel="apple-touch-icon" href="/icon.jpg">
-    <meta name="theme-color" content="#1e293b">
+    <meta id="theme-color-meta" name="theme-color" content="#fafaf9">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Lora:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600;1,700&display=swap" rel="stylesheet">
@@ -67,7 +67,7 @@
                     <template x-for="(articles, category) in data.categories" :key="category">
                         <a :href="'#' + category.replace(/\s+/g, '-').toLowerCase()" 
                            class="text-sm font-medium transition"
-                           :class="activeSection === category ? 'text-indigo-600 dark:text-indigo-400 font-bold' : 'text-stone-600 dark:text-stone-400 hover:text-indigo-600 dark:hover:text-indigo-400'"
+                           :class="activeSection === category.replace(/\s+/g, '-').toLowerCase() ? 'text-indigo-600 dark:text-indigo-400 font-bold' : 'text-stone-600 dark:text-stone-400 hover:text-indigo-600 dark:hover:text-indigo-400'"
                            x-text="category"></a>
                     </template>
                 </nav>
@@ -93,7 +93,7 @@
                 <template x-for="(articles, category) in data.categories" :key="category">
                     <a :href="'#' + category.replace(/\s+/g, '-').toLowerCase()" 
                        class="inline-block text-sm font-medium px-2 py-1 transition-colors border-b-2"
-                       :class="activeSection === category ? 'text-indigo-600 dark:text-indigo-400 font-bold border-indigo-600 dark:border-indigo-400' : 'text-stone-600 dark:text-stone-400 border-transparent hover:text-indigo-600 dark:hover:text-indigo-400'"
+                       :class="activeSection === category.replace(/\s+/g, '-').toLowerCase() ? 'text-indigo-600 dark:text-indigo-400 font-bold border-indigo-600 dark:border-indigo-400' : 'text-stone-600 dark:text-stone-400 border-transparent'"
                        x-text="category"></a>
                 </template>
             </nav>
@@ -102,7 +102,7 @@
         <!-- Categories and News -->
         <div x-show="!loading && !error" x-cloak class="space-y-12">
             <template x-for="(articles, category) in data.categories" :key="category">
-                <section :id="category.replace(/\s+/g, '-').toLowerCase()" class="scroll-mt-32" x-intersect.half="activeSection = category">
+                <section :id="category.replace(/\s+/g, '-').toLowerCase()" class="scroll-mt-32">
                     <div class="flex items-center mb-6">
                         <h2 class="text-2xl font-bold text-stone-800 dark:text-stone-100" x-text="category"></h2>
                         <div class="ml-4 flex-grow h-px bg-stone-200 dark:bg-neutral-700"></div>
