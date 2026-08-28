@@ -1,7 +1,8 @@
 import os
 import json
 import logging
-from datetime import datetime
+from datetime import datetime, timedelta
+import calendar
 import feedparser
 import trafilatura
 from pydantic import BaseModel, Field
@@ -29,7 +30,23 @@ def load_config():
 def fetch_rss_feed(url, max_items):
     logging.info(f"Fetching RSS: {url}")
     feed = feedparser.parse(url)
-    return feed.entries[:max_items]
+    
+    recent_entries = []
+    now = datetime.utcnow()
+    
+    for entry in feed.entries:
+        entry_time_struct = entry.get('published_parsed') or entry.get('updated_parsed')
+        if entry_time_struct:
+            entry_dt = datetime.utcfromtimestamp(calendar.timegm(entry_time_struct))
+            if now - entry_dt <= timedelta(days=1):
+                recent_entries.append(entry)
+        else:
+            recent_entries.append(entry)
+            
+        if len(recent_entries) >= max_items:
+            break
+            
+    return recent_entries
 
 def scrape_text(url):
     try:
