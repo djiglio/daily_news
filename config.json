@@ -45,7 +45,7 @@
     ]
   },
   "settings": {
-    "max_items_per_feed": 5,
-    "max_items_per_category": 3
+    "max_items_per_feed": 20,
+    "max_items_per_category": 10
   }
 }
