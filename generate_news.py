@@ -19,6 +19,7 @@ class NewsItem(BaseModel):
     title: str = Field(description="Titolo informativo, chiaro e rigorosamente anti-clickbait")
     summary: str = Field(description="Sintesi ultrabreve e concisa, massimo 1 frase ad alto impatto (max 15-20 parole).")
     deep_dive: str = Field(description="Testo molto lungo, articolato e ricchissimo di dettagli. Devi scrivere un vero articolo di approfondimento esaustivo (almeno 4-5 paragrafi lunghi) analizzando contesto, cause, impatti e integrando tutte le sfumature delle varie fonti.")
+    image_url: str = Field(description="URL di un'immagine pertinente, scelto tra gli 'image' forniti negli articoli del gruppo. Usa una stringa vuota se non c'è.")
     sources: list[str] = Field(description="Elenco esplicito dei link originali usati come fonte")
 
 class CategoryNews(BaseModel):
@@ -54,10 +55,12 @@ def scrape_text(url):
         downloaded = trafilatura.fetch_url(url)
         if downloaded:
             text = trafilatura.extract(downloaded)
-            return text
+            metadata = trafilatura.extract_metadata(downloaded)
+            image = metadata.image if metadata else ""
+            return text, image
     except Exception as e:
         logging.warning(f"Failed to scrape {url}: {e}")
-    return None
+    return None, ""
 
 def process_category(category_name, urls, max_rss_items, max_out_items, client):
     logging.info(f"Processing category: {category_name}")
@@ -68,11 +71,12 @@ def process_category(category_name, urls, max_rss_items, max_out_items, client):
         for entry in entries:
             link = entry.link
             title = entry.title
-            text = scrape_text(link)
+            text, image_url = scrape_text(link)
             if text:
                 raw_articles.append({
                     'url': link,
                     'title': title,
+                    'image': image_url or "",
                     'text': text[:2500]  # truncate to avoid huge tokens
                 })
     
@@ -88,6 +92,7 @@ Per ogni evento genera:
 2. Una sintesi ultrabreve (massimo 1 frase diretta e concisa, 15-20 parole).
 3. Un deep-dive molto esteso e ricco di dettagli. Deve essere un vero e proprio articolo lungo, diviso in paragrafi ben articolati. Esplora a fondo il background, i vari punti di vista esposti negli articoli, le cause e i possibili impatti futuri. Non essere riassuntivo qui, prenditi tutto lo spazio necessario per esaurire l'argomento fondendo i dati di tutte le fonti.
 4. I link originali delle fonti che hai usato per quel deep-dive tra quelli forniti.
+5. L'URL di un'immagine rappresentativa (sceglilo tra le chiavi 'image' degli articoli forniti, usa stringa vuota se assente).
 
 Articoli forniti:
 {json.dumps(raw_articles, ensure_ascii=False, indent=2)}
