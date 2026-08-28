@@ -3,6 +3,7 @@ import json
 import logging
 from datetime import datetime, timedelta
 import calendar
+import time
 import feedparser
 import trafilatura
 from pydantic import BaseModel, Field
@@ -131,6 +132,8 @@ def main():
         items = process_category(cat, feeds, max_items_per_feed, max_items_per_category, client)
         if items:
             final_output["categories"][cat] = items
+        logging.info("Sleeping for 15 seconds to avoid API rate limits...")
+        time.sleep(15)
             
     # Save output
     os.makedirs(os.path.dirname(OUTPUT_PATH), exist_ok=True)
