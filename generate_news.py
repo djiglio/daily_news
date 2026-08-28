@@ -91,7 +91,7 @@ Articoli forniti:
         return [item.model_dump() for item in category_news.items]
     except Exception as e:
         logging.error(f"Error generating content for {category_name}: {e}")
-        return []
+        return [{"title": "Error", "summary": str(e), "deep_dive": "", "sources": []}]
 
 def main():
     api_key = os.environ.get("GEMINI_API_KEY")
