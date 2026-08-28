@@ -8,6 +8,8 @@
     <link rel="manifest" href="/manifest.json">
     <link rel="icon" type="image/jpeg" href="/icon.jpg">
     <link rel="apple-touch-icon" href="/icon.jpg">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta id="theme-color-meta" name="theme-color" content="#fafaf9">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -43,7 +45,7 @@
       :class="{'drawer-open': activeArticle !== null}">
 
     <!-- Header -->
-    <header class="sticky top-0 z-40 bg-stone-50/80 dark:bg-neutral-800/80 backdrop-blur-md border-b border-stone-200 dark:border-neutral-700 shadow-sm">
+    <header class="sticky top-0 z-40 bg-stone-50/80 dark:bg-neutral-800/80 backdrop-blur-md border-b border-stone-200 dark:border-neutral-700 shadow-sm pt-[env(safe-area-inset-top)]">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
             <h1 class="text-3xl font-serif tracking-widest text-stone-900 dark:text-white" style="-webkit-text-stroke: 1.5px; -webkit-text-fill-color: transparent;">DN</h1>
             <div class="flex items-center gap-4">
