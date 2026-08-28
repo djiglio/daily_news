@@ -16,8 +16,8 @@ OUTPUT_PATH = 'public/data/news_today.json'
 
 class NewsItem(BaseModel):
     title: str = Field(description="Titolo informativo, chiaro e rigorosamente anti-clickbait")
-    summary: str = Field(description="Sintesi mattutina, esattamente 2 o 3 righe per la notizia")
-    deep_dive: str = Field(description="Testo dettagliato di approfondimento (spiegazione di contesto, cause, impatti), stile mash-up")
+    summary: str = Field(description="Sintesi ultrabreve e concisa, massimo 1 frase ad alto impatto (max 15-20 parole).")
+    deep_dive: str = Field(description="Testo molto lungo, articolato e ricchissimo di dettagli. Devi scrivere un vero articolo di approfondimento esaustivo (almeno 4-5 paragrafi lunghi) analizzando contesto, cause, impatti e integrando tutte le sfumature delle varie fonti.")
     sources: list[str] = Field(description="Elenco esplicito dei link originali usati come fonte")
 
 class CategoryNews(BaseModel):
@@ -80,12 +80,12 @@ def process_category(category_name, urls, max_rss_items, max_out_items, client):
     
     # Use Gemini to generate the structured output
     prompt = f"""
-Sei un esperto giornalista. Ho raccolto diversi articoli per la categoria '{category_name}'.
+Sei un esperto giornalista e analista. Ho raccolto diversi articoli per la categoria '{category_name}'.
 Analizza i seguenti articoli e raggruppali nei {max_out_items} eventi di cronaca o argomenti più importanti.
 Per ogni evento genera:
-1. Un titolo (anti-clickbait, molto informativo)
-2. Una sintesi di esattamente 2-3 righe
-3. Un deep-dive (testo dettagliato, contesto, cause, impatti) basato sui testi forniti
+1. Un titolo (anti-clickbait, estremamente informativo).
+2. Una sintesi ultrabreve (massimo 1 frase diretta e concisa, 15-20 parole).
+3. Un deep-dive molto esteso e ricco di dettagli. Deve essere un vero e proprio articolo lungo, diviso in paragrafi ben articolati. Esplora a fondo il background, i vari punti di vista esposti negli articoli, le cause e i possibili impatti futuri. Non essere riassuntivo qui, prenditi tutto lo spazio necessario per esaurire l'argomento fondendo i dati di tutte le fonti.
 4. I link originali delle fonti che hai usato per quel deep-dive tra quelli forniti.
 
 Articoli forniti:
