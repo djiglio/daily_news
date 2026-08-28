@@ -11,7 +11,7 @@
     <meta name="theme-color" content="#1e293b">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,500;0,600;0,700;0,800;0,900;1,500;1,600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Lora:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600;1,700&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -20,7 +20,7 @@
                 extend: {
                     fontFamily: {
                         sans: ['Inter', 'sans-serif'],
-                        serif: ['"Playfair Display"', 'serif'],
+                        serif: ['"Lora"', 'serif'],
                     }
                 }
             }
@@ -34,6 +34,7 @@
         .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 </style>
     <!-- Alpine.js for interactions -->
+    <script defer src="https://cdn.jsdelivr.net/npm/@alpinejs/intersect@3.x.x/dist/cdn.min.js"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 </head>
 <body class="bg-stone-100 text-stone-900 dark:bg-neutral-900 dark:text-stone-100 font-sans transition-colors duration-300" 
@@ -65,7 +66,8 @@
                 <nav class="flex flex-col space-y-2" x-show="!loading && !error">
                     <template x-for="(articles, category) in data.categories" :key="category">
                         <a :href="'#' + category.replace(/\s+/g, '-').toLowerCase()" 
-                           class="text-sm text-stone-600 dark:text-stone-300 hover:text-indigo-600 dark:hover:text-indigo-400 font-medium transition"
+                           class="text-sm font-medium transition"
+                           :class="activeSection === category ? 'text-indigo-600 dark:text-indigo-400 font-bold' : 'text-stone-600 dark:text-stone-400 hover:text-indigo-600 dark:hover:text-indigo-400'"
                            x-text="category"></a>
                     </template>
                 </nav>
@@ -90,7 +92,8 @@
             <nav class="flex space-x-6" x-show="!loading && !error">
                 <template x-for="(articles, category) in data.categories" :key="category">
                     <a :href="'#' + category.replace(/\s+/g, '-').toLowerCase()" 
-                       class="inline-block text-sm font-medium text-stone-600 dark:text-stone-300 hover:text-indigo-600"
+                       class="inline-block text-sm font-medium px-2 py-1 transition-colors border-b-2"
+                       :class="activeSection === category ? 'text-indigo-600 dark:text-indigo-400 font-bold border-indigo-600 dark:border-indigo-400' : 'text-stone-600 dark:text-stone-400 border-transparent hover:text-indigo-600 dark:hover:text-indigo-400'"
                        x-text="category"></a>
                 </template>
             </nav>
@@ -99,7 +102,7 @@
         <!-- Categories and News -->
         <div x-show="!loading && !error" x-cloak class="space-y-12">
             <template x-for="(articles, category) in data.categories" :key="category">
-                <section :id="category.replace(/\s+/g, '-').toLowerCase()" class="scroll-mt-32">
+                <section :id="category.replace(/\s+/g, '-').toLowerCase()" class="scroll-mt-32" x-intersect.half="activeSection = category">
                     <div class="flex items-center mb-6">
                         <h2 class="text-2xl font-bold text-stone-800 dark:text-stone-100" x-text="category"></h2>
                         <div class="ml-4 flex-grow h-px bg-stone-200 dark:bg-neutral-700"></div>

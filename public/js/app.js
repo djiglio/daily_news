@@ -6,6 +6,7 @@ function newsApp() {
         error: null,
         activeArticle: null,
         activeCategory: null,
+        activeSection: '',
         isDark: false,
 
         initApp() {
