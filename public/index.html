@@ -44,7 +44,10 @@
     <!-- Header -->
     <header class="sticky top-0 z-40 bg-stone-50/80 dark:bg-neutral-800/80 backdrop-blur-md border-b border-stone-200 dark:border-neutral-700 shadow-sm">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-            <h1 class="text-3xl font-black tracking-tighter text-stone-900 dark:text-white">DN</h1>
+            <div class="flex items-center gap-3">
+                <img src="/icon.jpg" alt="Logo" class="w-8 h-8 rounded-md shadow-sm border border-stone-200 dark:border-neutral-600">
+                <h1 class="text-3xl font-serif tracking-widest text-stone-900 dark:text-white" style="-webkit-text-stroke: 1.5px; -webkit-text-fill-color: transparent;">DN</h1>
+            </div>
             <div class="flex items-center gap-4">
                 <span class="text-xs text-stone-500 dark:text-stone-400" x-text="'Aggiornato: ' + lastUpdate"></span>
                 <button @click="toggleTheme()" class="p-2 rounded-full hover:bg-stone-100 dark:hover:bg-neutral-700 transition">
