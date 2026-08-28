@@ -1,0 +1,37 @@
+{
+  "categories": {
+    "Top News": [
+      "https://www.ansa.it/sito/ansait_rss.xml"
+    ],
+    "Italia": [
+      "https://www.ansa.it/sito/notizie/cronaca/cronaca_rss.xml"
+    ],
+    "Mondo": [
+      "https://www.ansa.it/sito/notizie/mondo/mondo_rss.xml"
+    ],
+    "Calcio & Sport": [
+      "https://www.gazzetta.it/rss/calcio.xml",
+      "https://www.gazzetta.it/rss/juventus.xml"
+    ],
+    "Politica": [
+      "https://www.ansa.it/sito/notizie/politica/politica_rss.xml"
+    ],
+    "Economia": [
+      "https://www.ilsole24ore.com/rss/economia.xml"
+    ],
+    "Attualità": [
+      "https://www.ilpost.it/feed/"
+    ],
+    "Tecnologia": [
+      "https://www.ansa.it/sito/notizie/tecnologia/tecnologia_rss.xml",
+      "https://www.hwupgrade.it/rss.xml"
+    ],
+    "Scienze": [
+      "https://www.ansa.it/scienza/notizie/rubriche/scienza_rss.xml"
+    ]
+  },
+  "settings": {
+    "max_items_per_feed": 5,
+    "max_items_per_category": 3
+  }
+}

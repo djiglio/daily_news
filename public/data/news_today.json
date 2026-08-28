@@ -1,0 +1,15 @@
+{
+  "timestamp": "2026-08-28T10:00:00Z",
+  "categories": {
+    "Top News": [
+      {
+        "title": "Benvenuto in Daily News",
+        "summary": "Questa è una notizia di esempio generata automaticamente. La configurazione della Web App è andata a buon fine.",
+        "deep_dive": "La tua rassegna stampa quotidiana è pronta per l'uso. Ogni giorno alle 08:50 (ora italiana), le GitHub Actions eseguiranno uno script Python che raccoglierà le ultime notizie dai Feed RSS selezionati, le farà analizzare e riassumere all'intelligenza artificiale (Gemini 2.5 Flash), e ne pubblicherà i risultati aggiornando questo file JSON.\n\nIl frontend leggero basato su Tailwind CSS e Alpine.js leggerà questo file e ti mostrerà i risultati in una comoda interfaccia PWA installabile sia su Desktop che su Smartphone.",
+        "sources": [
+          "https://github.com/djiglio/daily_news"
+        ]
+      }
+    ]
+  }
+}
