@@ -1,60 +1,117 @@
 {
-  "timestamp": "2026-08-28T10:56:04.170840Z",
+  "timestamp": "2026-08-28T12:26:36.097565Z",
   "categories": {
     "Top News": [
       {
-        "title": "Error",
-        "summary": "404 NOT_FOUND. {'error': {'code': 404, 'message': 'This model models/gemini-2.5-flash is no longer available to new users. Please update your code to use models/gemini-3.6-flash for the latest features and improvements. We recommend you to use the Interactions API.', 'status': 'NOT_FOUND'}}",
-        "deep_dive": "",
-        "sources": []
+        "title": "Alluvione lampo in Nepal: salvati 27 turisti tra cui due italiani, gli esperti citano l'impatto del riscaldamento globale",
+        "summary": "Un'improvvisa alluvione nella regione del Bhotekoshi ha devastato la zona richiedendo l'intervento immediato dei soccorsi. Tra i turisti evacuati a Katmandu si trovano i due cittadini italiani Valentina Piccinini e Stefano Lotumolo. La comunità scientifica attribuisce l'evento al cedimento del ghiacciaio e all'instabilità del permafrost dovuti al clima.",
+        "deep_dive": "Una devastante alluvione lampo nella valle del fiume Bhotekoshi ha causato estesi danni e portato al salvataggio di 27 turisti stranieri nel distretto di Rasuwa. Tra i sopravvissuti figurano gli italiani Valentina Piccinini e Stefano Lotumolo, tratti in salvo con elicotteri e condotti a Katmandu. Secondo gli studi rilanciati su Nature, l'evento catastrofico è legato al cedimento di un ghiacciaio non monitorato, provocato dall'instabilità del permafrost d'alta quota soggetta allo scioglimento causato dal riscaldamento globale.",
+        "sources": [
+          "https://www.ansa.it/canale_scienza/notizie/terra_poli/2026/08/28/il-disastro-in-nepal-un-campanello-dallarme-del-riscaldamento-globale_422a2e3c-5254-47af-a767-979d3633cbd5.html",
+          "https://www.ansa.it/sito/notizie/mondo/2026/08/27/ci-sono-due-italiani-tra-i-27-turisti-stranieri-salvati-dalla-frana-in-nepal_14909e7c-063b-4158-b12b-3bc2346f8a38.html"
+        ]
+      },
+      {
+        "title": "Bilancio vacanze estive 2026: spesa di 20,4 miliardi di euro in Italia ma pesano 541 milioni di rincari",
+        "summary": "Le stime dell'Istituto Demoskopika registrano oltre 188 milioni di presenze turistiche nei mesi di luglio e agosto 2026. L'inflazione del settore ha generato un aumento medio della spesa pari a 12,50 euro a presenza rispetto all'anno precedente. L'effetto combinato dei grandi volumi porta l'impatto economico complessivo dei rincari a 541 milioni di euro.",
+        "deep_dive": "L'analisi dei flussi turistici dell'estate 2026 effettuata da Demoskopika rileva una spesa complessiva pari a 20,4 miliardi di euro, segnando un incremento del 7,5% rispetto al 2025. Nonostante una lieve decelerazione della crescita inflazionistica turistica attestatasi al +2,6%, ben 541 milioni di euro dell'importo totale derivano dagli aumenti dei prezzi di listino registrati per alloggi e servizi durante la stagione estiva.",
+        "sources": [
+          "https://www.ansa.it/canale_viaggi/notizie/news/2026/08/27/vacanze-tra-luglio-e-agosto-spesi-20-miliardi-ma-541-milioni-dovuti-ai-rincari_f5a76a60-cfe9-4b78-af31-0cce50d7e4b4.html"
+        ]
+      },
+      {
+        "title": "Femminicidio in Spagna: arrestato cittadino italiano di 60 anni per l'uccisione della compagna a Isla Cristina",
+        "summary": "Un uomo di sessant'anni di nazionalità italiana è stato fermato in Andalusia dalla Guardia Civil spagnola. L'accusa nei suoi confronti è l'omicidio della compagna tedesca di 47 anni ritrovata accoltellata in strada. La coppia si trovava in vacanza a bordo di un camper lungo le coste della provincia di Huelva.",
+        "deep_dive": "La Guardia Civil ha arrestato un italiano di 60 anni presso la località balneare di Isla Cristina con l'accusa di femminicidio. Il corpo privo di vita della sua compagna, una cittadina tedesca di 47 anni ferita mortalmente da numerose coltellate, è stato scorto dai passanti nei pressi di Avenida dell'Atlantico. Gli inquirenti hanno bloccato il sospettato nella zona in cui la coppia sostava in camper, portandolo in caserma per le procedure giudiziarie.",
+        "sources": [
+          "https://www.ansa.it/sito/notizie/cronaca/2026/08/28/arrestato-un-italiano-in-spagna-e-accusato-di-aver-ucciso-la-compagna_48f80d61-1ccd-4a2f-a31f-c12538be42b1.html"
+        ]
       }
     ],
     "Italia": [
       {
-        "title": "Error",
-        "summary": "404 NOT_FOUND. {'error': {'code': 404, 'message': 'This model models/gemini-2.5-flash is no longer available to new users. Please update your code to use models/gemini-3.6-flash for the latest features and improvements. We recommend you to use the Interactions API.', 'status': 'NOT_FOUND'}}",
-        "deep_dive": "",
-        "sources": []
+        "title": "Svolta nelle indagini sull'avvelenamento da ricina a Pietracatella: 131 reperti analizzati",
+        "summary": "Gli investigatori della Squadra Mobile di Campobasso hanno effettuato 131 prelievi nella casa delle due donne decedute per avvelenamento da ricina a Pietracatella. Gli accertamenti della Scientifica e i nuovi interrogatori potrebbero portare a una svolta decisiva nelle prossime settimane.",
+        "deep_dive": "La polizia scientifica ha effettuato un un imponente sopralluogo nell'abitazione della famiglia Di Vita a Pietracatella, repertando 131 campioni tra indumenti, mobili e suppellettili per verificare la presenza di ricina o altri componenti chimici del Ricinus communis. I campioni prelevati sono custoditi presso la Questura di Campobasso secondo i protocolli forniti dagli esperti del Robert Koch Institute di Berlino. Le indagini riguardano il decesso di Sara e della madre Antonella Di Ielsi, inizialmente attribuito a un'intossicazione alimentare e poi rivelatosi avvelenamento. La procuratrice Elvira Antonelli e il capo della Squadra Mobile Marco Graziano stanno ascoltando testimoni e persone informate sui fatti, raccogliendo elementi che potrebbero risolvere il caso nel breve termine.",
+        "sources": [
+          "https://www.ansa.it/sito/notizie/cronaca/2026/08/28/morte-avvelenate-prelievi-in-casa-anche-su-abiti-mobili-e-suppellettili_67bc8193-fc91-4edd-a2a5-c06364c2a886.html"
+        ]
+      },
+      {
+        "title": "Arrestato un uomo di 49 anni a Cona per maltrattamenti e tentato strangolamento della moglie",
+        "summary": "I Carabinieri hanno eseguito un'ordinanza di custodia cautelare in carcere per un quarantanovenne residente a Cona, accusato di violenze e minacce nei confronti della moglie. L'arresto e arrivato a seguito della denuncia della vittima dopo un tentato strangolamento avvenuto a luglio.",
+        "deep_dive": "Un uomo di 49 anni e stato arrestato e trasferito nel carcere di Padova su ordinanza emessa dal Gip del Tribunale di Venezia per maltrattamenti in famiglia. La ricostruzione degli inquirenti evidenzia un progressivo deterioramento del rapporto coniugale iniziato alla fine del 2024 con atteggiamenti di marcata possessivita, sfociati dal mese di aprile 2025 in minacce e insulti. L'episodio piu grave si e verificato a luglio, quando l'uomo ha minacciato di morte la moglie tentando di strangolarla. A seguito della querela presentata dalla donna e della richiesta di ammonimento al Questore, le autorita giudiziarie sono intervenute tempestivamente per garantire la sicurezza della vittima.",
+        "sources": [
+          "https://www.ansa.it/sito/notizie/cronaca/2026/08/28/cerca-di-strangolare-la-moglie-arrestato-un-49enne_5cf99a90-8cbb-403f-93c7-34654473c15f.html"
+        ]
+      },
+      {
+        "title": "Lanciato in Italia il flashmob diffuso degli aquiloni in solidarieta con i bambini di Gaza",
+        "summary": "Domenica alle 17:30 si terra in tutta Italia una mobilitazione popolare spontanea con il volo contemporaneo di aquiloni dedicati ai bambini della Striscia di Gaza. L'iniziativa risponde al recente divieto di lancio degli aquiloni stabilito dalle autorita israeliane.",
+        "deep_dive": "L'iniziativa spontanea Aquiloni per i bambini di Gaza e stata promossa in rete e sostenuta da realta sociali come Assopace Palestina, che invitano i cittadini a far volare aquiloni e a condividerne le immagini sui canali social. La manifestazione nasce in reazione alle dure restrizioni annunciate dal governo israeliano. Il ministro della Difesa di Israele, Israel Katz, ha infatti dichiarato che qualsiasi lancio effettuato dalla Striscia sara considerato un atto terroristico passibile di risposta militare e di evacuazione dei quartieri interessati, allo scopo di prevenire il riutilizzo di metodi di intimidazione contro le comunita del sud di Israele.",
+        "sources": [
+          "https://www.ansa.it/sito/notizie/cronaca/2026/08/28/domenica-il-flashmob-diffuso-degli-aquiloni-per-i-bambini-di-gaza_c92409f8-988e-4052-bae2-b516d32cf815.html"
+        ]
       }
     ],
     "Mondo": [
       {
-        "title": "Error",
-        "summary": "404 NOT_FOUND. {'error': {'code': 404, 'message': 'This model models/gemini-2.5-flash is no longer available to new users. Please update your code to use models/gemini-3.6-flash for the latest features and improvements. We recommend you to use the Interactions API.', 'status': 'NOT_FOUND'}}",
-        "deep_dive": "",
-        "sources": []
-      }
-    ],
-    "Calcio & Sport": [
+        "title": "Alluvione in Nepal: il bilancio sale a 538 vittime e quasi mille dispersi",
+        "summary": "L'Autorità nazionale del Nepal per la riduzione del rischio e la gestione dei disastri ha aggiornato il bilancio dell'alluvione che ha devastato il Paese. Si contano 538 morti confermati e 977 dispersi, tra cui oltre cinquecento cittadini stranieri, mentre continuano le complesse operazioni di soccorso.",
+        "deep_dive": "La devastante ondata di maltempo e inondazioni che si è abbattuta sul Nepal ha provocato una catastrofe umanitaria senza precedenti nella regione himalayana. L'Autorità nazionale per la riduzione del rischio e la gestione dei disastri (Ndrrma) ha confermato che il numero dei morti accertati è salito a 538. Le operazioni di ricerca e soccorso si svolgono in condizioni estremamente complesse a causa dei danni alle infrastrutture e del terreno impervio. Oltre ai decessi, si registra un elevatissimo numero di dispersi, pari a 977 persone, tra le quali si contano ben 517 cittadini stranieri. L'impatto del disastro mette a dura prova la macchina dei soccorsi locale, impegnata nell'assistenza agli sfollati e nel tentativo di rintracciare i sopravvissuti.",
+        "sources": [
+          "https://www.ansa.it/sito/notizie/mondo/asia/2026/08/28/autorita-nepal-il-bilancio-delle-vittime-dellalluvione-sale-a-538_b7153e35-b5fe-4734-a7f1-c10d70684eaf.html"
+        ]
+      },
       {
-        "title": "Error",
-        "summary": "404 NOT_FOUND. {'error': {'code': 404, 'message': 'This model models/gemini-2.5-flash is no longer available to new users. Please update your code to use models/gemini-3.6-flash for the latest features and improvements. We recommend you to use the Interactions API.', 'status': 'NOT_FOUND'}}",
-        "deep_dive": "",
-        "sources": []
+        "title": "Emergenza educativa in Yemen: due bambini su tre esclusi dalla scuola secondo Save the Children",
+        "summary": "Un'indagine di Save the Children rivela che due terzi dei bambini nello Yemen meridionale non frequentano le scuole dopo un decennio di guerra. La grave crisi economica, il lavoro minorile e i tagli agli aiuti internazionali aggravano drammaticamente il fenomeno.",
+        "deep_dive": "Oltre dieci anni di conflitti e sfollamenti forzati hanno devastato il sistema educativo dello Yemen, condannando un'intera generazione. Secondo un rapporto pubblicato da Save the Children basato su un'indagine in quattro distretti meridionali (Aden, Lahj e Taiz), quasi due terzi dei minori non possono andare a scuola: il 32% non si è mai iscritto, mentre un ulteriore quarto ha abbandonato gli studi. Complessivamente, il Piano di risposta umanitaria dell'ONU stima che 6,6 milioni di bambini siano attualmente esclusi dall'istruzione nel Paese. Le cause principali risiedono nell'estrema povertà delle famiglie, nell'impennata dei prezzi di cibo e carburante e nella riduzione dei fondi umanitari internazionali. Il 92% dei nuclei familiari intervistati dichiara di non sapere come procurarsi il prossimo pasto e l'84% non può sostenere le spese per i libri. Di conseguenza, cresce il fenomeno del lavoro minorile, che coinvolge oltre il 12% dei bambini tra i 5 e i 14 anni in attività ad alto rischio.",
+        "sources": [
+          "https://www.ansa.it/sito/notizie/mondo/mediooriente/2026/08/28/save-the-children-nello-yemen-due-bambini-su-tre-non-possono_99c48f9d-3c02-486d-9791-a24849938d5e.html"
+        ]
+      },
+      {
+        "title": "Lutto in Norvegia: muore re Harald V, il figlio Haakon VIII assume la reggenza",
+        "summary": "A seguito della scomparsa di re Harald V, il nuovo sovrano Haakon VIII ha presieduto il suo primo Consiglio dei ministri ad Oslo. La nazione osserva il lutto ufficiale con il suono delle campane e i ventuno colpi a salve sparati dall'esercito.",
+        "deep_dive": "La Norvegia vive una storica giornata di transizione istituzionale e lutto nazionale a seguito della scomparsa di re Harald V. A meno di cinque ore dal decesso del padre, re Haakon VIII ha presieduto un Consiglio dei ministri straordinario al Palazzo Reale di Oslo, accompagnato dalla principessa erede Ingrid-Alexandra. Nel corso della riunione, il sovrano ha informato ufficialmente l'esecutivo guidato dal primo ministro Jonas Gahr Støre, confermando la piena disponibilità ad assumere le funzioni di reggente. Per commemorare la figura dello scomparso monarca, il Paese ha attivato i protocolli di lutto di Stato: tutte le chiese luterane hanno suonato le campane a lutto per un'ora, mentre le forze armate hanno sparato 21 colpi di cannone a salve. La comunità e i vertici religiosi hanno espresso profonda gratitudine per il lungo servizio reso da re Harald alla nazione.",
+        "sources": [
+          "https://www.ansa.it/sito/notizie/mondo/europa/2026/08/28/primo-consiglio-dei-ministri-per-re-haakon-viii-di-norvegia_29e9304e-a59a-4b27-abf0-477afdcc62cf.html"
+        ]
       }
     ],
     "Politica": [
       {
         "title": "Error",
-        "summary": "404 NOT_FOUND. {'error': {'code': 404, 'message': 'This model models/gemini-2.5-flash is no longer available to new users. Please update your code to use models/gemini-3.6-flash for the latest features and improvements. We recommend you to use the Interactions API.', 'status': 'NOT_FOUND'}}",
+        "summary": "503 UNAVAILABLE. {'error': {'code': 503, 'message': 'This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.', 'status': 'UNAVAILABLE'}}",
         "deep_dive": "",
         "sources": []
       }
     ],
     "Economia": [
       {
-        "title": "Error",
-        "summary": "404 NOT_FOUND. {'error': {'code': 404, 'message': 'This model models/gemini-2.5-flash is no longer available to new users. Please update your code to use models/gemini-3.6-flash for the latest features and improvements. We recommend you to use the Interactions API.', 'status': 'NOT_FOUND'}}",
-        "deep_dive": "",
-        "sources": []
-      }
-    ],
-    "Tecnologia": [
+        "title": "Istat: a giugno fatturato dell'industria in calo mensile dell'1%, volumi fermi su base annua",
+        "summary": "I dati Istat di giugno mostrano una contrazione mensile del fatturato industriale pari all'1% sia a valore sia a volume.\nNonostante l'incremento tendenziale del 3,1% su base annua, la crescita è determinata quasi esclusivamente dall'aumento dei listini energetici.",
+        "deep_dive": "L'analisi dell'Istat sul fatturato dell'industria a giugno evidenzia un quadro di stasi per il settore manifatturiero italiano. A fronte di un calo congiunturale dell'1% rispetto a maggio, il dato su base annua segna un +3,1% in valore, a cui fa tuttavia riscontro una contrazione dei volumi tradotti in beni reali di quasi un punto percentuale. L'incremento nominale dei ricavi è stato guidato principalmente dai rincari energetici (+22%) e dalla crescita della metallurgia (+13,9%), mentre nel complesso del primo semestre la produzione si attesta su un modesto +0,5%. A condizionare le performance industriali sono i rallentamenti nei settori della moda, della carta e dei mobili, parzialmente bilanciati dalla ripresa del comparto automotive. Sul fronte estero, l'aumento delle esportazioni del 4,5% nella prima metà dell'anno risulta fortemente influenzato da flussi straordinari verso la Svizzera di oro in lingotti, a fronte di una sostanziale tenuta o flessione degli altri comparti tradizionali del Made in Italy.",
+        "sources": [
+          "https://www.ilsole24ore.com/art/frenata-giugno-1percento-i-ricavi-dell-industria-AJKxL8w"
+        ]
+      },
       {
-        "title": "Error",
-        "summary": "404 NOT_FOUND. {'error': {'code': 404, 'message': 'This model models/gemini-2.5-flash is no longer available to new users. Please update your code to use models/gemini-3.6-flash for the latest features and improvements. We recommend you to use the Interactions API.', 'status': 'NOT_FOUND'}}",
-        "deep_dive": "",
-        "sources": []
+        "title": "Caro-carburanti: il governo valuta la misura selettiva del bonus benzina in busta paga",
+        "summary": "Il governo punta a superare il taglio orizzontale delle accise introducendo aiuti mirati per specifiche fasce di lavoratori.\nTra le ipotesi principali figura l'erogazione di buoni benzina aziendali detraibili come fringe benefit.",
+        "deep_dive": "In vista della scadenza della proroga sul taglio parziale delle accise sul gasolio, la maggioranza di governo sta studiando interventi più selettivi per contrastare i rincari dei carburanti. L'orientamento dell'esecutivo è quello di abbandonare i sussidi ad ampia platea per concentrare le risorse disponibili su misure mirate ai lavoratori dipendenti e alle famiglie a minor reddito. La proposta centrale, sostenuta anche dal Ministero dell'Economia, riguarda l'estensione o il rifinanziamento dei buoni benzina in busta paga erogati dai datori di lavoro mediante lo strumento dei fringe benefit, trattabili come costi deducibili d'impresa. Al contempo perde quota l'ipotesi di un sostegno veicolato tramite la carta sociale 'Dedicata a te', considerata da diverse forze politiche una soluzione meno flessibile ed efficiente per intercettare l'effettivo fabbisogno di mobilità della popolazione lavorativa.",
+        "sources": [
+          "https://www.ilsole24ore.com/art/carburanti-vaglio-bonus-busta-paga-mezzogiorno-rincari-maggiori-diesel-AJMgQ6w"
+        ]
+      },
+      {
+        "title": "Formula 1 a Monza: il Gran Premio genera un impatto economico di 350 milioni di euro in Lombardia",
+        "summary": "Il weekend di gara all'Autodromo di Monza stima oltre 380mila spettatori complessivi e circa 127mila pernottamenti.\nL'impatto economico totale sul territorio sfiora i 350 milioni di euro grazie al traino dell'hospitality e dei turisti stranieri.",
+        "deep_dive": "Il Gran Premio d'Italia di Formula 1 a Monza rappresenta un volano economico fondamentale per la Lombardia, con una ricaduta complessiva stimata attorno ai 343-350 milioni di euro. Le analisi condotte dalla società di marketing turistico Jfc evidenziano oltre 380mila presenze previste nel fine settimana di gara, con 44mila arrivi turistici e 127mila pernottamenti concentrati negli alberghi della regione. L'impatto diretto sulla filiera turistica tra hospitality, ristorazione ed eventi accessori supera i 104 milioni di euro, cui si affiancano 43 milioni di indotto indiretto e oltre 160 milioni in termini di posizionamento del brand. A sostenere la crescita del business sono soprattutto gli appassionati provenienti da Regno Unito, Germania e Olanda, insieme a un marcato incremento della domanda di servizi e pacchetti VIP ad alto valore aggiunto, con il settore dell'ospitalità di fascia alta che registra un progresso del 18% rispetto all'anno precedente.",
+        "sources": [
+          "https://www.ilsole24ore.com/art/formula-1-gran-premio-monza-business-cresce-350-milioni-AJVc9aw"
+        ]
       }
     ]
   }
