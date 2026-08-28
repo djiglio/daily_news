@@ -1,4 +1,61 @@
 {
-  "timestamp": "2026-08-28T10:50:58.927806Z",
-  "categories": {}
+  "timestamp": "2026-08-28T10:56:04.170840Z",
+  "categories": {
+    "Top News": [
+      {
+        "title": "Error",
+        "summary": "404 NOT_FOUND. {'error': {'code': 404, 'message': 'This model models/gemini-2.5-flash is no longer available to new users. Please update your code to use models/gemini-3.6-flash for the latest features and improvements. We recommend you to use the Interactions API.', 'status': 'NOT_FOUND'}}",
+        "deep_dive": "",
+        "sources": []
+      }
+    ],
+    "Italia": [
+      {
+        "title": "Error",
+        "summary": "404 NOT_FOUND. {'error': {'code': 404, 'message': 'This model models/gemini-2.5-flash is no longer available to new users. Please update your code to use models/gemini-3.6-flash for the latest features and improvements. We recommend you to use the Interactions API.', 'status': 'NOT_FOUND'}}",
+        "deep_dive": "",
+        "sources": []
+      }
+    ],
+    "Mondo": [
+      {
+        "title": "Error",
+        "summary": "404 NOT_FOUND. {'error': {'code': 404, 'message': 'This model models/gemini-2.5-flash is no longer available to new users. Please update your code to use models/gemini-3.6-flash for the latest features and improvements. We recommend you to use the Interactions API.', 'status': 'NOT_FOUND'}}",
+        "deep_dive": "",
+        "sources": []
+      }
+    ],
+    "Calcio & Sport": [
+      {
+        "title": "Error",
+        "summary": "404 NOT_FOUND. {'error': {'code': 404, 'message': 'This model models/gemini-2.5-flash is no longer available to new users. Please update your code to use models/gemini-3.6-flash for the latest features and improvements. We recommend you to use the Interactions API.', 'status': 'NOT_FOUND'}}",
+        "deep_dive": "",
+        "sources": []
+      }
+    ],
+    "Politica": [
+      {
+        "title": "Error",
+        "summary": "404 NOT_FOUND. {'error': {'code': 404, 'message': 'This model models/gemini-2.5-flash is no longer available to new users. Please update your code to use models/gemini-3.6-flash for the latest features and improvements. We recommend you to use the Interactions API.', 'status': 'NOT_FOUND'}}",
+        "deep_dive": "",
+        "sources": []
+      }
+    ],
+    "Economia": [
+      {
+        "title": "Error",
+        "summary": "404 NOT_FOUND. {'error': {'code': 404, 'message': 'This model models/gemini-2.5-flash is no longer available to new users. Please update your code to use models/gemini-3.6-flash for the latest features and improvements. We recommend you to use the Interactions API.', 'status': 'NOT_FOUND'}}",
+        "deep_dive": "",
+        "sources": []
+      }
+    ],
+    "Tecnologia": [
+      {
+        "title": "Error",
+        "summary": "404 NOT_FOUND. {'error': {'code': 404, 'message': 'This model models/gemini-2.5-flash is no longer available to new users. Please update your code to use models/gemini-3.6-flash for the latest features and improvements. We recommend you to use the Interactions API.', 'status': 'NOT_FOUND'}}",
+        "deep_dive": "",
+        "sources": []
+      }
+    ]
+  }
 }
