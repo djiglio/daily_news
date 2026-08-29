@@ -37,3 +37,10 @@ jobs:
           git config --local user.name "github-actions[bot]"
           git add public/data/news_today.json
           git diff --quiet && git diff --staged --quiet || (git commit -m "chore: Aggiornamento automatico rassegna stampa $(date +'%Y-%m-%d')" && git push)
+
+      - name: Send Push Notification (Ntfy)
+        env:
+          NTFY_TOPIC: ${{ secrets.NTFY_TOPIC }}
+        if: env.NTFY_TOPIC != ''
+        run: |
+          curl -H "Title: Daily News 📰" -H "Tags: newspaper" -H "Click: https://djiglio.github.io/daily_news/" -d "La nuova rassegna stampa è appena stata generata ed è pronta per essere letta!" "https://ntfy.sh/${NTFY_TOPIC}"
