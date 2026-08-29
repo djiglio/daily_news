@@ -47,6 +47,41 @@ function newsApp() {
                 meta.setAttribute('content', this.isDark ? '#262626' : '#fafaf9');
             }
         },
+        
+        enablePushNotifications() {
+            if (!('Notification' in window)) {
+                alert("Questo browser non supporta le notifiche push native.");
+                return;
+            }
+            Notification.requestPermission().then((permission) => {
+                if (permission === 'granted') {
+                    if (!firebase.apps.length) {
+                        firebase.initializeApp({
+                            apiKey: "AIzaSyD6eFyVEbQueT_MudaEO0B_4RK_pm091rQ",
+                            authDomain: "dailynews-c9a32.firebaseapp.com",
+                            projectId: "dailynews-c9a32",
+                            storageBucket: "dailynews-c9a32.firebasestorage.app",
+                            messagingSenderId: "903970367164",
+                            appId: "1:903970367164:web:280515f9c320c9d37312b9"
+                        });
+                    }
+                    const messaging = firebase.messaging();
+                    messaging.getToken({ vapidKey: "BARUDz5Bb6MRbnrOnn6mCWf3B8YdPf3SyInB5-oWVrOBxJacneNwFN0_FCsX7-eTeXP_vijV9tZPX8zMumztktI" }).then((currentToken) => {
+                        if (currentToken) {
+                            prompt("Permesso accordato! Copia questo Token esatto e incollalo nei Secrets di GitHub col nome FCM_TOKEN:", currentToken);
+                        } else {
+                            alert('Nessun token di registrazione disponibile.');
+                        }
+                    }).catch((err) => {
+                        console.error('Errore durante il recupero del token.', err);
+                        alert("Errore FCM: " + err);
+                    });
+                } else {
+                    alert("Hai negato il permesso alle notifiche.");
+                }
+            });
+        },
+
         toggleTheme() {
             this.isDark = !this.isDark;
             if (this.isDark) {

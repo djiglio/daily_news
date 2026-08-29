@@ -38,6 +38,10 @@
     <!-- Alpine.js for interactions -->
     <script defer src="https://cdn.jsdelivr.net/npm/@alpinejs/intersect@3.x.x/dist/cdn.min.js"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/10.9.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.9.0/firebase-messaging-compat.js"></script>
 </head>
 <body class="bg-stone-100 text-stone-900 dark:bg-neutral-900 dark:text-stone-100 font-sans transition-colors duration-300" 
       x-data="newsApp()" 
@@ -49,6 +53,9 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
             <h1 class="text-3xl font-serif tracking-widest text-stone-900 dark:text-white" style="-webkit-text-stroke: 1.5px; -webkit-text-fill-color: transparent;">DN</h1>
             <div class="flex items-center gap-4">
+                <button @click="enablePushNotifications()" class="p-2 rounded-full hover:bg-stone-100 dark:hover:bg-neutral-700 transition text-stone-600 dark:text-stone-300" title="Attiva Notifiche Push">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path></svg>
+                </button>
                 <span class="text-xs text-stone-500 dark:text-stone-400" x-text="'Aggiornato: ' + lastUpdate"></span>
                 <button @click="toggleTheme()" class="p-2 rounded-full hover:bg-stone-100 dark:hover:bg-neutral-700 transition">
                     <svg x-show="!isDark" class="w-5 h-5 text-stone-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg>
