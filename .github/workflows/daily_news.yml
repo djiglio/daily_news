@@ -2,7 +2,7 @@ name: Daily News Generator
 
 on:
   schedule:
-    - cron: '50 6 * * *' # 06:50 UTC (08:50 IT time)
+    - cron: '13 6,18 * * *' # 06:13 e 18:13 UTC (circa 08:13 e 20:13 in Italia)
   workflow_dispatch: # Permette l'esecuzione manuale
 
 jobs:
