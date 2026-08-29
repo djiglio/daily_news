@@ -18,7 +18,7 @@ OUTPUT_PATH = 'public/data/news_today.json'
 class NewsItem(BaseModel):
     title: str = Field(description="Titolo informativo, chiaro e rigorosamente anti-clickbait")
     summary: str = Field(description="Sintesi ultrabreve e concisa, massimo 1 frase ad alto impatto (max 15-20 parole).")
-    deep_dive: str = Field(description="Testo molto lungo, articolato e ricchissimo di dettagli. Devi scrivere un vero articolo di approfondimento esaustivo (almeno 4-5 paragrafi lunghi) analizzando contesto, cause, impatti e integrando tutte le sfumature delle varie fonti.")
+    deep_dive: str = Field(description="Testo lungo (4-5 paragrafi), approfondito e formatto. Usa paragrafi separati da doppio a capo (\n\n) ed evidenzia in **grassetto** solo i nomi, i numeri o le parole chiave principali di ogni paragrafo.")
     image_url: str = Field(description="URL di un'immagine pertinente, scelto tra gli 'image' forniti negli articoli del gruppo. Usa una stringa vuota se non c'è.")
     sources: list[str] = Field(description="Elenco esplicito dei link originali usati come fonte")
 

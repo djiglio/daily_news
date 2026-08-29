@@ -95,6 +95,17 @@ function newsApp() {
             document.documentElement.style.fontSize = size + 'px';
             localStorage.setItem('fontSize', size);
         },
+        
+        formatText(text) {
+            if (!text) return '';
+            // Escape HTML
+            let safeText = text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+            // Bold
+            safeText = safeText.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+            // Paragraphs
+            const paragraphs = safeText.split(/\n\s*\n/).filter(p => p.trim() !== '');
+            return paragraphs.map(p => `<p class="mb-5 leading-relaxed text-lg">${p}</p>`).join('');
+        },
         toggleTheme() {
             this.isDark = !this.isDark;
             if (this.isDark) {
