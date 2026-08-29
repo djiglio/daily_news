@@ -36,16 +36,16 @@
     "Attualità": [
       "https://www.ilpost.it/feed/"
     ],
-    "Tecnologia": [
+    "Scienze e Tecnologia": [
       "https://www.ansa.it/sito/notizie/tecnologia/tecnologia_rss.xml",
+      "https://www.ansa.it/scienza/notizie/rubriche/scienza_rss.xml",
+      "https://www.wired.it/feed/rss",
+      "https://www.hdblog.it/feed/",
       "https://www.hwupgrade.it/rss.xml"
-    ],
-    "Scienze": [
-      "https://www.ansa.it/scienza/notizie/rubriche/scienza_rss.xml"
     ]
   },
   "settings": {
     "max_items_per_feed": 20,
-    "max_items_per_category": 10
+    "max_items_per_category": 8
   }
 }
