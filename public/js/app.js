@@ -7,6 +7,8 @@ function newsApp() {
         activeArticle: null,
         activeCategory: null,
         activeSection: '',
+        settingsOpen: false,
+        fontSize: 16,
         isDark: false,
 
         initApp() {
@@ -20,6 +22,12 @@ function newsApp() {
             }
             this.updateThemeColor();
 
+            
+            let savedSize = localStorage.getItem('fontSize');
+            if (savedSize) {
+                this.fontSize = parseInt(savedSize);
+                document.documentElement.style.fontSize = this.fontSize + 'px';
+            }
             this.fetchNews();
             // Scroll spy for navigation highlighting
             window.addEventListener('scroll', () => {
@@ -82,6 +90,11 @@ function newsApp() {
             });
         },
 
+        changeFontSize(size) {
+            this.fontSize = size;
+            document.documentElement.style.fontSize = size + 'px';
+            localStorage.setItem('fontSize', size);
+        },
         toggleTheme() {
             this.isDark = !this.isDark;
             if (this.isDark) {

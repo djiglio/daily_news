@@ -52,14 +52,9 @@
     <header class="sticky top-0 z-40 bg-stone-50/80 dark:bg-neutral-800/80 backdrop-blur-md border-b border-stone-200 dark:border-neutral-700 shadow-sm pt-[env(safe-area-inset-top)]">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
             <h1 class="text-3xl font-serif tracking-widest text-stone-900 dark:text-white" style="-webkit-text-stroke: 1.5px; -webkit-text-fill-color: transparent;">DN</h1>
-            <div class="flex items-center gap-4">
-                <button @click="enablePushNotifications()" class="p-2 rounded-full hover:bg-stone-100 dark:hover:bg-neutral-700 transition text-stone-600 dark:text-stone-300" title="Attiva Notifiche Push">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path></svg>
-                </button>
-                <span class="text-xs text-stone-500 dark:text-stone-400" x-text="'Aggiornato: ' + lastUpdate"></span>
-                <button @click="toggleTheme()" class="p-2 rounded-full hover:bg-stone-100 dark:hover:bg-neutral-700 transition">
-                    <svg x-show="!isDark" class="w-5 h-5 text-stone-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg>
-                    <svg x-show="isDark" x-cloak class="w-5 h-5 text-stone-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+            <div class="flex items-center">
+                <button @click="settingsOpen = true" class="p-2 rounded-full hover:bg-stone-100 dark:hover:bg-neutral-700 transition text-stone-600 dark:text-stone-300" title="Impostazioni">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
                 </button>
             </div>
         </div>
@@ -219,5 +214,64 @@
             });
         }
     </script>
+
+    <!-- Settings Modal -->
+    <div x-show="settingsOpen" style="display: none;" class="relative z-50" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+        <div x-show="settingsOpen" x-transition.opacity class="fixed inset-0 bg-stone-900/80 backdrop-blur-sm transition-opacity"></div>
+        <div class="fixed inset-0 z-10 w-screen overflow-y-auto">
+            <div class="flex min-h-full items-center justify-center p-4 text-center sm:p-0">
+                <div x-show="settingsOpen" @click.away="settingsOpen = false" x-transition class="relative transform overflow-hidden rounded-2xl bg-stone-50 dark:bg-neutral-800 text-left shadow-xl transition-all sm:my-8 w-full max-w-lg border border-stone-200 dark:border-neutral-700">
+                    <div class="px-4 pb-4 pt-5 sm:p-6 sm:pb-4">
+                        <div class="flex justify-between items-center mb-6">
+                            <h3 class="text-2xl font-bold font-serif text-stone-900 dark:text-stone-100" id="modal-title">Impostazioni</h3>
+                            <button @click="settingsOpen = false" class="text-stone-400 hover:text-stone-500">
+                                <span class="sr-only">Chiudi</span>
+                                <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+                            </button>
+                        </div>
+
+                        <div class="space-y-6">
+                            <!-- Last Update -->
+                            <div class="flex justify-between items-center py-3 border-b border-stone-200 dark:border-neutral-700">
+                                <span class="font-medium text-stone-700 dark:text-stone-300">Ultimo aggiornamento</span>
+                                <span class="text-stone-500 dark:text-stone-400 text-sm font-medium" x-text="lastUpdate"></span>
+                            </div>
+
+                            <!-- Theme -->
+                            <div class="flex justify-between items-center py-3 border-b border-stone-200 dark:border-neutral-700">
+                                <span class="font-medium text-stone-700 dark:text-stone-300">Tema Scuro</span>
+                                <button @click="toggleTheme()" :class="isDark ? 'bg-indigo-600' : 'bg-stone-300 dark:bg-neutral-600'" class="relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out">
+                                    <span aria-hidden="true" :class="isDark ? 'translate-x-5' : 'translate-x-0'" class="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out"></span>
+                                </button>
+                            </div>
+
+                            <!-- Font Size -->
+                            <div class="py-3 border-b border-stone-200 dark:border-neutral-700">
+                                <div class="flex justify-between items-center mb-4">
+                                    <span class="font-medium text-stone-700 dark:text-stone-300">Dimensione Testo</span>
+                                </div>
+                                <div class="flex gap-3">
+                                    <button @click="changeFontSize(14)" :class="fontSize === 14 ? 'bg-indigo-600 text-white' : 'bg-stone-200 text-stone-700 dark:bg-neutral-700 dark:text-stone-300'" class="flex-1 py-2 rounded-lg font-medium transition">Piccolo</button>
+                                    <button @click="changeFontSize(16)" :class="fontSize === 16 ? 'bg-indigo-600 text-white' : 'bg-stone-200 text-stone-700 dark:bg-neutral-700 dark:text-stone-300'" class="flex-1 py-2 rounded-lg font-medium transition">Medio</button>
+                                    <button @click="changeFontSize(18)" :class="fontSize === 18 ? 'bg-indigo-600 text-white' : 'bg-stone-200 text-stone-700 dark:bg-neutral-700 dark:text-stone-300'" class="flex-1 py-2 rounded-lg font-medium transition">Grande</button>
+                                </div>
+                            </div>
+
+                            <!-- Notifications -->
+                            <div class="py-3">
+                                <div class="flex justify-between items-center">
+                                    <span class="font-medium text-stone-700 dark:text-stone-300">Notifiche Push</span>
+                                    <button @click="enablePushNotifications()" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium rounded-lg transition shadow-sm">
+                                        Genera Token
+                                    </button>
+                                </div>
+                                <p class="text-xs text-stone-500 dark:text-stone-400 mt-2 leading-relaxed">Ricevi un avviso quando la nuova rassegna è pronta. Incolla il Token generato in GitHub.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </body>
 </html>
