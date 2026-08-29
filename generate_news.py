@@ -98,23 +98,31 @@ Articoli forniti:
 {json.dumps(raw_articles, ensure_ascii=False, indent=2)}
 """
 
-    try:
-        response = client.models.generate_content(
-            model='gemini-3.6-flash',
-            contents=prompt,
-            config=types.GenerateContentConfig(
-                response_mime_type="application/json",
-                response_schema=CategoryNews,
-                temperature=0.3
-            ),
-        )
-        
-        # Parse the JSON response
-        category_news = CategoryNews.model_validate_json(response.text)
-        return [item.model_dump() for item in category_news.items]
-    except Exception as e:
-        logging.error(f"Error generating content for {category_name}: {e}")
-        return [{"title": "Error", "summary": str(e), "deep_dive": "", "sources": []}]
+    max_retries = 3
+    for attempt in range(max_retries):
+        try:
+            response = client.models.generate_content(
+                model='gemini-3.6-flash',
+                contents=prompt,
+                config=types.GenerateContentConfig(
+                    response_mime_type="application/json",
+                    response_schema=CategoryNews,
+                    temperature=0.3
+                ),
+            )
+            
+            # Parse the JSON response
+            category_news = CategoryNews.model_validate_json(response.text)
+            return [item.model_dump() for item in category_news.items]
+        except Exception as e:
+            logging.error(f"Error generating content for {category_name} (Attempt {attempt+1}/{max_retries}): {e}")
+            if attempt < max_retries - 1:
+                sleep_time = 10 * (attempt + 1)
+                logging.info(f"Retrying in {sleep_time} seconds...")
+                import time
+                time.sleep(sleep_time)
+            else:
+                return [{"title": "Servizio Temporaneamente Non Disponibile", "summary": "L'Intelligenza Artificiale è attualmente sovraccarica. Le notizie per questa categoria non sono potute essere generate. Riprova più tardi.", "deep_dive": str(e), "image_url": "", "sources": []}]
 
 def main():
     api_key = os.environ.get("GEMINI_API_KEY")
