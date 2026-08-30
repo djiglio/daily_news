@@ -1,9 +1,7 @@
 name: Daily News Generator
 
 on:
-  schedule:
-    - cron: '13 1,13 * * *' # 01:13 e 13:13 UTC (circa 03:13 e 15:13 in Italia)
-  workflow_dispatch: # Permette l'esecuzione manuale
+  workflow_dispatch: # Avvio via API/Webhook esterno e manuale
 
 jobs:
   generate:
