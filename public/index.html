@@ -70,7 +70,7 @@
                 <nav class="flex flex-col space-y-2" x-show="!loading && !error">
                     <template x-for="(articles, category) in data.categories" :key="category">
                         <a :href="'#' + category.replace(/\s+/g, '-').toLowerCase()" 
-                           class="block text-sm font-medium transition-all duration-300 border-l-[3px] pl-4 py-1.5"
+                           class="block text-sm transition-all duration-200 py-1.5"
                            :class="activeSection === category.replace(/\s+/g, \'-\').toLowerCase() ? \'text-stone-900 dark:text-white font-bold border-stone-900 dark:border-white\' : \'text-stone-500 dark:text-stone-400 hover:text-stone-800 dark:hover:text-stone-200 border-transparent hover:border-stone-300 dark:hover:border-stone-600\'"
                            x-text="category"></a>
                     </template>
@@ -96,7 +96,7 @@
             <nav class="flex space-x-6" x-show="!loading && !error">
                 <template x-for="(articles, category) in data.categories" :key="category">
                     <a :href="'#' + category.replace(/\s+/g, '-').toLowerCase()" 
-                       class="inline-block text-sm font-medium px-1 py-2 mx-3 transition-all duration-300 border-b-[3px]"
+                       class="inline-block text-sm px-1 py-2 mx-3 transition-all duration-200"
                        :class="activeSection === category.replace(/\s+/g, \'-\').toLowerCase() ? \'text-stone-900 dark:text-white font-bold border-stone-900 dark:border-white\' : \'text-stone-500 dark:text-stone-400 border-transparent\'"
                        x-text="category"></a>
                 </template>
