@@ -1,7 +1,9 @@
 name: Daily News Generator
 
 on:
-  workflow_dispatch: # Avvio via API/Webhook esterno e manuale
+  workflow_dispatch: # Avvio manuale
+  repository_dispatch: # Avvio universale via Webhook/API
+    types: [daily_news_trigger]
 
 jobs:
   generate:
