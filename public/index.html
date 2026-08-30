@@ -96,7 +96,7 @@
             <nav class="flex space-x-6" x-show="!loading && !error">
                 <template x-for="(articles, category) in data.categories" :key="category">
                     <a :href="'#' + category.replace(/\s+/g, '-').toLowerCase()" 
-                       class="inline-block text-sm px-1 py-2 mx-3 transition-all duration-200"
+                       class="inline-block text-sm px-1 py-2 transition-all duration-200"
                        :class="activeSection === category.replace(/\s+/g, '-').toLowerCase() ? 'text-stone-900 dark:text-white font-bold underline underline-offset-[6px] decoration-2' : 'text-stone-500 dark:text-stone-400 font-medium'"
                        x-text="category"></a>
                 </template>
