@@ -67,7 +67,7 @@
         <aside class="hidden lg:block w-48 flex-shrink-0">
             <div class="sticky top-24">
                 <h3 class="text-xs font-bold text-stone-900 dark:text-stone-400 uppercase tracking-wider mb-4">Sezioni</h3>
-                <nav class="flex flex-col space-y-2" x-show="!loading && !error">
+                <nav class="flex flex-col gap-2" x-show="!loading && !error">
                     <template x-for="(articles, category) in data.categories" :key="category">
                         <a :href="'#' + category.replace(/\s+/g, '-').toLowerCase()" 
                            class="block text-sm transition-all duration-200 py-1.5"
@@ -93,7 +93,7 @@
 
         <!-- Mobile Navigation -->
         <div class="lg:hidden sticky top-16 z-30 bg-stone-100/90 dark:bg-neutral-900/90 backdrop-blur-md border-b border-stone-200 dark:border-neutral-700 -mx-4 px-4 sm:-mx-6 sm:px-6 py-3 mb-6 overflow-x-auto whitespace-nowrap hide-scrollbar">
-            <nav class="flex space-x-6" x-show="!loading && !error">
+            <nav class="flex gap-6" x-show="!loading && !error">
                 <template x-for="(articles, category) in data.categories" :key="category">
                     <a :href="'#' + category.replace(/\s+/g, '-').toLowerCase()" 
                        class="inline-block text-sm px-1 py-2 transition-all duration-200"
