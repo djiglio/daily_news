@@ -63,7 +63,14 @@
         <!-- Mobile Navigation -->
         <div class="lg:hidden w-full overflow-x-auto whitespace-nowrap hide-scrollbar px-4 sm:px-6 pt-1 pb-1 border-t border-stone-200 dark:border-neutral-700">
             <nav class="flex gap-6" x-show="!loading && !error">
-                <template x-for="(articles, category) in data.categories" :key="category">
+                        <a href="#salvati" 
+                           class="inline-flex items-center gap-1 text-sm px-1 py-2 transition-all duration-200"
+                           :class="activeSection === 'salvati' ? 'text-stone-900 dark:text-white font-bold underline underline-offset-[6px] decoration-2' : 'text-stone-500 dark:text-stone-400 font-medium'"
+                           x-show="savedArticles.length > 0">
+                            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path d="M5 4a2 2 0 012-2h6a2 2 0 012 2v14l-5-2.5L5 18V4z"></path></svg>
+                            Salvati
+                        </a>
+                        <template x-for="(articles, category) in data.categories" :key="category">
                     <a :href="'#' + category.replace(/\s+/g, '-').toLowerCase()" 
                        class="inline-block text-sm px-1 py-2 transition-all duration-200"
                        :class="activeSection === category.replace(/\s+/g, '-').toLowerCase() ? 'text-stone-900 dark:text-white font-bold underline underline-offset-[6px] decoration-2' : 'text-stone-500 dark:text-stone-400 font-medium'"
@@ -83,7 +90,14 @@
             <div class="sticky top-24">
                 <h3 class="text-xs font-bold text-stone-900 dark:text-stone-400 uppercase tracking-wider mb-4">Sezioni</h3>
                 <nav class="flex flex-col gap-2" x-show="!loading && !error">
-                    <template x-for="(articles, category) in data.categories" :key="category">
+                        <a href="#salvati" 
+                           class="flex items-center justify-between text-sm transition-all duration-200 py-1.5"
+                           :class="activeSection === 'salvati' ? 'text-stone-900 dark:text-white font-bold underline underline-offset-[6px] decoration-2' : 'text-stone-500 dark:text-stone-400 font-medium hover:text-stone-800 dark:hover:text-stone-200'"
+                           x-show="savedArticles.length > 0">
+                            Salvati
+                            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path d="M5 4a2 2 0 012-2h6a2 2 0 012 2v14l-5-2.5L5 18V4z"></path></svg>
+                        </a>
+                        <template x-for="(articles, category) in data.categories" :key="category">
                         <a :href="'#' + category.replace(/\s+/g, '-').toLowerCase()" 
                            class="block text-sm transition-all duration-200 py-1.5"
                            :class="activeSection === category.replace(/\s+/g, '-').toLowerCase() ? 'text-stone-900 dark:text-white font-bold underline underline-offset-[6px] decoration-2' : 'text-stone-500 dark:text-stone-400 font-medium hover:text-stone-800 dark:hover:text-stone-200'"
@@ -105,8 +119,45 @@
         <div x-show="error" x-cloak class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
             <span class="block sm:inline" x-text="error"></span>
         </div><!-- Categories and News -->
-        <div x-show="!loading && !error" x-cloak class="space-y-12">
-            <template x-for="(articles, category) in data.categories" :key="category">
+          <div x-show="!loading && !error" x-cloak class="space-y-12">
+              
+              <!-- Salvati Section -->
+              <section id="salvati" class="scroll-mt-32" x-show="savedArticles.length > 0">
+                  <div class="flex items-center mb-6">
+                      <h2 class="text-2xl font-bold text-stone-800 dark:text-stone-100 flex items-center gap-2">
+                          <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20"><path d="M5 4a2 2 0 012-2h6a2 2 0 012 2v14l-5-2.5L5 18V4z"></path></svg>
+                          Notizie Salvate
+                      </h2>
+                      <div class="ml-4 flex-grow h-px bg-stone-200 dark:bg-neutral-700"></div>
+                  </div>
+                  
+                  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                      <template x-for="(article, index) in savedArticles" :key="article.title">
+                          <article class="bg-stone-50 dark:bg-neutral-800 rounded-xl shadow-sm hover:shadow-md transition-shadow border border-stone-100 dark:border-neutral-700 cursor-pointer overflow-hidden flex flex-col h-full"
+                                   @click="openArticle(article, 'salvati', index)">
+                              <template x-if="article.image_url">
+                                  <div class="w-full h-48 overflow-hidden bg-stone-200 dark:bg-neutral-700">
+                                      <img :src="article.image_url" alt="" class="w-full h-full object-cover" loading="lazy">
+                                  </div>
+                              </template>
+                              <div class="p-6 flex-grow flex flex-col">
+                                  <h3 class="text-lg font-bold mb-3 leading-snug font-serif text-stone-900 dark:text-white" x-text="article.title"></h3>
+                                  <p class="line-clamp-3 text-sm text-stone-600 dark:text-stone-300 flex-grow" x-text="article.summary"></p>
+                              </div>
+                              <div class="px-6 py-4 border-t border-stone-100 dark:border-neutral-700 bg-stone-50/50 dark:bg-neutral-800/50 mt-auto flex items-center justify-between">
+                                  <span class="text-xs font-medium text-indigo-600 dark:text-indigo-400 flex items-center">
+                                      Leggi l'approfondimento &rarr;
+                                  </span>
+                                  <button @click.stop="toggleSave(article)" class="text-stone-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition" title="Rimuovi dai salvati">
+                                      <svg class="w-5 h-5" :fill="isSaved(article) ? 'currentColor' : 'none'" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"></path></svg>
+                                  </button>
+                              </div>
+                          </article>
+                      </template>
+                  </div>
+              </section>
+
+              <template x-for="(articles, category) in data.categories" :key="category">
                 <section :id="category.replace(/\s+/g, '-').toLowerCase()" class="scroll-mt-32">
                     <div class="flex items-center mb-6">
                         <h2 class="text-2xl font-bold text-stone-800 dark:text-stone-100" x-text="category"></h2>
@@ -127,11 +178,14 @@
                                     <h3 class="text-lg font-bold mb-3 leading-snug font-serif text-stone-900 dark:text-white" x-text="article.title"></h3>
                                     <p class="line-clamp-3 text-sm text-stone-600 dark:text-stone-300 flex-grow" x-text="article.summary"></p>
                                 </div>
-                                <div class="px-6 py-4 border-t border-stone-100 dark:border-neutral-700 bg-stone-50/50 dark:bg-neutral-800/50 mt-auto">
-                                    <span class="text-xs font-medium text-indigo-600 dark:text-indigo-400 flex items-center">
-                                        Leggi l'approfondimento &rarr;
-                                    </span>
-                                </div>
+                                <div class="px-6 py-4 border-t border-stone-100 dark:border-neutral-700 bg-stone-50/50 dark:bg-neutral-800/50 mt-auto flex items-center justify-between">
+                                      <span class="text-xs font-medium text-indigo-600 dark:text-indigo-400 flex items-center">
+                                          Leggi l'approfondimento &rarr;
+                                      </span>
+                                      <button @click.stop="toggleSave(article)" class="text-stone-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition" title="Salva notizia">
+                                          <svg class="w-5 h-5" :fill="isSaved(article) ? 'currentColor' : 'none'" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"></path></svg>
+                                      </button>
+                                  </div>
                             </article>
                         </template>
                     </div>
@@ -176,7 +230,18 @@
                     </div>
 
                     <div class="p-6 sm:p-8" x-if="activeArticle">
-                        <h2 class="text-3xl font-bold font-serif mb-6 leading-tight text-stone-900 dark:text-white" x-text="activeArticle?.title"></h2>
+                        <h2 class="text-3xl font-bold font-serif leading-tight text-stone-900 dark:text-white" x-text="activeArticle?.title"></h2>
+                        <div class="flex items-center gap-4 mt-4 mb-8">
+                            <button @click="toggleSpeech(activeArticle?.deep_dive)" class="flex items-center gap-2 text-sm font-medium px-4 py-2 rounded-full transition" :class="isSpeaking ? 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900/50 dark:text-indigo-300' : 'bg-stone-100 text-stone-700 dark:bg-neutral-800 dark:text-stone-300 hover:bg-stone-200 dark:hover:bg-neutral-700'">
+                                <svg x-show="!isSpeaking" class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd"></path></svg>
+                                <svg x-show="isSpeaking" class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8 7a1 1 0 00-1 1v4a1 1 0 002 0V8a1 1 0 00-1-1zm4 0a1 1 0 00-1 1v4a1 1 0 002 0V8a1 1 0 00-1-1z" clip-rule="evenodd"></path></svg>
+                                <span x-text="isSpeaking ? 'Ferma lettura' : 'Ascolta articolo'"></span>
+                            </button>
+                            <button @click="toggleSave(activeArticle)" class="flex items-center gap-2 text-sm font-medium px-4 py-2 rounded-full transition" :class="isSaved(activeArticle) ? 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900/50 dark:text-indigo-300' : 'bg-stone-100 text-stone-700 dark:bg-neutral-800 dark:text-stone-300 hover:bg-stone-200 dark:hover:bg-neutral-700'">
+                                <svg class="w-4 h-4" :fill="isSaved(activeArticle) ? 'currentColor' : 'none'" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"></path></svg>
+                                <span x-text="isSaved(activeArticle) ? 'Salvato' : 'Salva'"></span>
+                            </button>
+                        </div>
                         <template x-if="activeArticle?.image_url">
                             <div class="w-full h-64 sm:h-80 mb-8 rounded-xl overflow-hidden shadow-sm bg-stone-200 dark:bg-neutral-700">
                                 <img :src="activeArticle?.image_url" alt="" class="w-full h-full object-cover" loading="lazy">
