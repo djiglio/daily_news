@@ -30,7 +30,7 @@ def send_push():
     
     headers = {
         "Authorization": f"Bearer {access_token}",
-        "Content-Type": "application/json"
+        "Content-Type": "application/json; UTF-8"
     }
     
     payload = {
@@ -38,7 +38,7 @@ def send_push():
             "token": token,
             "notification": {
                 "title": "Il tuo Daily News",
-                "body": "La rassegna stampa è pronta! Tocca qui per scoprire le notizie fondamentali di oggi."
+                "body": "La rassegna stampa e' pronta! Tocca qui per scoprire le notizie fondamentali di oggi."
             },
             "webpush": {
                 "fcm_options": {
