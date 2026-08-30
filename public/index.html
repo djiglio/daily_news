@@ -116,7 +116,7 @@
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                         <template x-for="(article, index) in articles" :key="article.title">
                             <article class="bg-stone-50 dark:bg-neutral-800 rounded-xl shadow-sm hover:shadow-md transition-shadow border border-stone-100 dark:border-neutral-700 cursor-pointer overflow-hidden flex flex-col h-full"
-                                     @click="openArticle(article, category)">
+                                     @click="openArticle(article, category, index)">
                                 <template x-if="article.image_url">
                                     <div class="w-full h-48 overflow-hidden bg-stone-200 dark:bg-neutral-700">
                                         <img :src="article.image_url" alt="" class="w-full h-full object-cover" loading="lazy">

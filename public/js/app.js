@@ -10,6 +10,9 @@ function newsApp() {
         settingsOpen: false,
         fontSize: 16,
         isDark: false,
+        savedArticles: [],
+        currentArticleIndex: -1,
+        isSpeaking: false,
 
         initApp() {
             // Check theme preference
@@ -28,6 +31,16 @@ function newsApp() {
                 this.fontSize = parseInt(savedSize);
                 document.documentElement.style.fontSize = this.fontSize + 'px';
             }
+            
+            let savedData = localStorage.getItem('savedArticles');
+            if (savedData) {
+                try {
+                    this.savedArticles = JSON.parse(savedData);
+                } catch(e) {
+                    this.savedArticles = [];
+                }
+            }
+
             this.fetchNews();
             // Scroll spy for navigation highlighting
             window.addEventListener('scroll', () => {
