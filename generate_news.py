@@ -18,7 +18,7 @@ OUTPUT_PATH = 'public/data/news_today.json'
 class NewsItem(BaseModel):
     title: str = Field(description="Titolo informativo, chiaro e rigorosamente anti-clickbait")
     summary: str = Field(description="Sintesi ultrabreve e concisa, massimo 1 frase ad alto impatto (max 15-20 parole).")
-    deep_dive: str = Field(description="Testo lungo (4-5 paragrafi), approfondito e formatto. Usa paragrafi separati da doppio a capo (\n\n) ed evidenzia in **grassetto** solo i nomi, i numeri o le parole chiave principali di ogni paragrafo.")
+    deep_dive: str = Field(description="Testo lungo (4-5 paragrafi), approfondito e formattato. Usa paragrafi separati da doppio a capo (\\n\\n) ed evidenzia in **grassetto** solo i nomi, i numeri o le parole chiave principali di ogni paragrafo.")
     image_url: str = Field(description="URL di un'immagine pertinente, scelto tra gli 'image' forniti negli articoli del gruppo. Usa una stringa vuota se non c'è.")
     sources: list[str] = Field(description="Elenco esplicito dei link originali usati come fonte")
 
@@ -62,40 +62,68 @@ def scrape_text(url):
         logging.warning(f"Failed to scrape {url}: {e}")
     return None, ""
 
-def process_category(category_name, urls, max_rss_items, max_out_items, client):
-    logging.info(f"Processing category: {category_name}")
-    raw_articles = []
+def fetch_all_global_news(config, max_items_per_feed):
+    logging.info("--- INIZIO RACCOLTA GLOBALE DELLE NOTIZIE ---")
+    global_articles = []
+    seen_urls = set()
     
-    for url in urls:
-        entries = fetch_rss_feed(url, max_rss_items)
+    # Collect all unique URLs from all categories
+    all_feed_urls = set()
+    for feeds in config["categories"].values():
+        for url in feeds:
+            all_feed_urls.add(url)
+            
+    for url in all_feed_urls:
+        entries = fetch_rss_feed(url, max_items_per_feed)
         for entry in entries:
             link = entry.link
+            if link in seen_urls:
+                continue
+                
+            seen_urls.add(link)
             title = entry.title
             text, image_url = scrape_text(link)
             if text:
-                raw_articles.append({
+                global_articles.append({
                     'url': link,
                     'title': title,
                     'image': image_url or "",
-                    'text': text[:2500]  # truncate to avoid huge tokens
+                    'text': text[:1500]  # truncate to save tokens but keep essence
                 })
+                
+    logging.info(f"--- RACCOLTA COMPLETATA: {len(global_articles)} articoli grezzi trovati ---")
+    return global_articles
+
+def process_category(category_name, global_articles, max_out_items, client):
+    logging.info(f"Processing category: {category_name} using global news pool")
     
-    if not raw_articles:
+    if not global_articles:
         return []
     
-    # Use Gemini to generate the structured output
+    # Use Gemini to generate the structured output based on the new editorial line
     prompt = f"""
-Sei un esperto giornalista e analista. Ho raccolto diversi articoli per la categoria '{category_name}'.
-Analizza i seguenti articoli e raggruppali nei {max_out_items} eventi di cronaca o argomenti più importanti.
-Per ogni evento genera:
+Sei il Direttore Responsabile di una testata giornalistica premium e indipendente. 
+Ti sto fornendo un enorme archivio di articoli grezzi pubblicati in tutto il mondo nelle ultime 24 ore.
+
+IL TUO COMPITO:
+Esamina l'intero archivio globale fornito e scrivi ESATTAMENTE {max_out_items} notizie destinate alla sezione '{category_name}' del nostro giornale.
+Sei libero di usare e incrociare QUALSIASI articolo dell'archivio, indipendentemente dalla sua fonte originale, per creare un quadro completo (Cross-pollination).
+
+LINEA EDITORIALE RIGOROSA (Mix Istituzionale e Geopolitico):
+Seleziona e ordina le 8 notizie seguendo questa priorità:
+1. PRIORITÀ MASSIMA (Apertura): Eventi di altissimo impatto geopolitico e macroeconomico, grandi crisi internazionali, istituzioni, guerre, elezioni nazionali o decisioni che cambiano la società.
+2. PRIORITÀ MEDIA (Primo Piano): Politica interna (solo se strutturale, ignora le polemiche da talk-show), riforme, grandi scoperte tecnologiche o scientifiche, macro-trend sociali.
+3. PRIORITÀ BASSA (Spalla): Cronaca locale, costume, gossip o dichiarazioni di poco conto. (Scartale se ci sono notizie più importanti).
+
+Per ogni notizia genera:
 1. Un titolo (anti-clickbait, estremamente informativo).
 2. Una sintesi ultrabreve (massimo 1 frase diretta e concisa, 15-20 parole).
-3. Un deep-dive molto esteso e ricco di dettagli. Deve essere un vero e proprio articolo lungo, diviso in paragrafi ben articolati. Esplora a fondo il background, i vari punti di vista esposti negli articoli, le cause e i possibili impatti futuri. Non essere riassuntivo qui, prenditi tutto lo spazio necessario per esaurire l'argomento fondendo i dati di tutte le fonti.
-4. I link originali delle fonti che hai usato per quel deep-dive tra quelli forniti.
-5. L'URL di un'immagine rappresentativa (sceglilo tra le chiavi 'image' degli articoli forniti, usa stringa vuota se assente).
+3. Un deep-dive molto esteso. Esplora a fondo il background, incrocia le fonti, spiega le cause e gli impatti. Usa paragrafi separati da doppio a capo (\\n\\n).
+4. I link originali delle fonti che hai usato per quel deep-dive tra quelli forniti nell'archivio.
+5. L'URL di un'immagine rappresentativa (sceglilo tra le chiavi 'image' degli articoli forniti).
 
-Articoli forniti:
-{json.dumps(raw_articles, ensure_ascii=False, indent=2)}
+Archivio Globale Fornito:
+{json.dumps(global_articles, ensure_ascii=False, indent=2)}
 """
 
     max_retries = 3
@@ -111,18 +139,16 @@ Articoli forniti:
                 ),
             )
             
-            # Parse the JSON response
             category_news = CategoryNews.model_validate_json(response.text)
             return [item.model_dump() for item in category_news.items]
         except Exception as e:
             logging.error(f"Error generating content for {category_name} (Attempt {attempt+1}/{max_retries}): {e}")
             if attempt < max_retries - 1:
-                sleep_time = 10 * (attempt + 1)
+                sleep_time = 15 * (attempt + 1)
                 logging.info(f"Retrying in {sleep_time} seconds...")
-                import time
                 time.sleep(sleep_time)
             else:
-                return [{"title": "Servizio Temporaneamente Non Disponibile", "summary": "L'Intelligenza Artificiale è attualmente sovraccarica. Le notizie per questa categoria non sono potute essere generate. Riprova più tardi.", "deep_dive": str(e), "image_url": "", "sources": []}]
+                return [{"title": "Servizio Temporaneamente Non Disponibile", "summary": f"Errore AI: {str(e)}", "deep_dive": "L'Intelligenza Artificiale non è riuscita a generare questa sezione. Riprova più tardi.", "image_url": "", "sources": []}]
 
 def main():
     api_key = os.environ.get("GEMINI_API_KEY")
@@ -133,16 +159,20 @@ def main():
     client = genai.Client(api_key=api_key)
     config = load_config()
     
-    max_items_per_feed = config.get("settings", {}).get("max_items_per_feed", 5)
-    max_items_per_category = config.get("settings", {}).get("max_items_per_category", 3)
+    max_items_per_feed = config.get("settings", {}).get("max_items_per_feed", 10) # reduced slightly for global fetch
+    max_items_per_category = config.get("settings", {}).get("max_items_per_category", 8)
+    
+    # 1. FETCH ALL GLOBAL NEWS ONCE
+    global_articles = fetch_all_global_news(config, max_items_per_feed)
     
     final_output = {
         "timestamp": datetime.utcnow().isoformat() + "Z",
         "categories": {}
     }
     
-    for cat, feeds in config["categories"].items():
-        items = process_category(cat, feeds, max_items_per_feed, max_items_per_category, client)
+    # 2. PROCESS CATEGORIES USING THE GLOBAL POOL
+    for cat in config["categories"].keys():
+        items = process_category(cat, global_articles, max_items_per_category, client)
         if items:
             final_output["categories"][cat] = items
         logging.info("Sleeping for 15 seconds to avoid API rate limits...")
