@@ -37,8 +37,8 @@ def send_push():
         "message": {
             "token": token,
             "notification": {
-                "title": "Daily News 📰",
-                "body": "La nuova rassegna stampa è pronta da leggere!"
+                "title": "Il tuo Daily News",
+                "body": "La rassegna stampa è pronta! Tocca qui per scoprire le notizie fondamentali di oggi."
             },
             "webpush": {
                 "fcm_options": {
