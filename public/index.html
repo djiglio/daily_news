@@ -71,7 +71,7 @@
                     <template x-for="(articles, category) in data.categories" :key="category">
                         <a :href="'#' + category.replace(/\s+/g, '-').toLowerCase()" 
                            class="block text-sm transition-all duration-200 py-1.5"
-                           :class="activeSection === category.replace(/\s+/g, \'-\').toLowerCase() ? \'text-stone-900 dark:text-white font-bold border-stone-900 dark:border-white\' : \'text-stone-500 dark:text-stone-400 hover:text-stone-800 dark:hover:text-stone-200 border-transparent hover:border-stone-300 dark:hover:border-stone-600\'"
+                           :class="activeSection === category.replace(/\s+/g, '-').toLowerCase() ? 'text-stone-900 dark:text-white font-bold underline underline-offset-[6px] decoration-2' : 'text-stone-500 dark:text-stone-400 font-medium hover:text-stone-800 dark:hover:text-stone-200'"
                            x-text="category"></a>
                     </template>
                 </nav>
@@ -97,7 +97,7 @@
                 <template x-for="(articles, category) in data.categories" :key="category">
                     <a :href="'#' + category.replace(/\s+/g, '-').toLowerCase()" 
                        class="inline-block text-sm px-1 py-2 mx-3 transition-all duration-200"
-                       :class="activeSection === category.replace(/\s+/g, \'-\').toLowerCase() ? \'text-stone-900 dark:text-white font-bold border-stone-900 dark:border-white\' : \'text-stone-500 dark:text-stone-400 border-transparent\'"
+                       :class="activeSection === category.replace(/\s+/g, '-').toLowerCase() ? 'text-stone-900 dark:text-white font-bold underline underline-offset-[6px] decoration-2' : 'text-stone-500 dark:text-stone-400 font-medium'"
                        x-text="category"></a>
                 </template>
             </nav>
