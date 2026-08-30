@@ -42,7 +42,7 @@ jobs:
         env:
           FCM_TOKEN: ${{ secrets.FCM_TOKEN }}
           FCM_SERVICE_ACCOUNT: ${{ secrets.FCM_SERVICE_ACCOUNT }}
-        if: env.FCM_TOKEN != '' && env.FCM_SERVICE_ACCOUNT != ''
+        if: secrets.FCM_TOKEN != '' && secrets.FCM_SERVICE_ACCOUNT != ''
         run: |
           pip install google-auth
           python send_fcm.py
