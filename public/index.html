@@ -58,6 +58,21 @@
                 </button>
             </div>
         </div>
+    
+
+        <!-- Mobile Navigation -->
+        <div class="lg:hidden w-full overflow-x-auto whitespace-nowrap hide-scrollbar px-4 sm:px-6 pt-1 pb-1 border-t border-stone-200 dark:border-neutral-700">
+            <nav class="flex gap-6" x-show="!loading && !error">
+                <template x-for="(articles, category) in data.categories" :key="category">
+                    <a :href="'#' + category.replace(/\s+/g, '-').toLowerCase()" 
+                       class="inline-block text-sm px-1 py-2 transition-all duration-200"
+                       :class="activeSection === category.replace(/\s+/g, '-').toLowerCase() ? 'text-stone-900 dark:text-white font-bold underline underline-offset-[6px] decoration-2' : 'text-stone-500 dark:text-stone-400 font-medium'"
+                       x-text="category"></a>
+                </template>
+            </nav>
+        </div>
+        
+        
     </header>
 
     <!-- Main Content -->
@@ -89,21 +104,7 @@
         <!-- Error State -->
         <div x-show="error" x-cloak class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
             <span class="block sm:inline" x-text="error"></span>
-        </div>
-
-        <!-- Mobile Navigation -->
-        <div class="lg:hidden sticky top-16 z-30 bg-stone-100/90 dark:bg-neutral-900/90 backdrop-blur-md border-b border-stone-200 dark:border-neutral-700 -mx-4 px-4 sm:-mx-6 sm:px-6 py-3 mb-6 overflow-x-auto whitespace-nowrap hide-scrollbar">
-            <nav class="flex gap-6" x-show="!loading && !error">
-                <template x-for="(articles, category) in data.categories" :key="category">
-                    <a :href="'#' + category.replace(/\s+/g, '-').toLowerCase()" 
-                       class="inline-block text-sm px-1 py-2 transition-all duration-200"
-                       :class="activeSection === category.replace(/\s+/g, '-').toLowerCase() ? 'text-stone-900 dark:text-white font-bold underline underline-offset-[6px] decoration-2' : 'text-stone-500 dark:text-stone-400 font-medium'"
-                       x-text="category"></a>
-                </template>
-            </nav>
-        </div>
-        
-        <!-- Categories and News -->
+        </div><!-- Categories and News -->
         <div x-show="!loading && !error" x-cloak class="space-y-12">
             <template x-for="(articles, category) in data.categories" :key="category">
                 <section :id="category.replace(/\s+/g, '-').toLowerCase()" class="scroll-mt-32">
