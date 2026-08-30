@@ -63,20 +63,22 @@
         <!-- Mobile Navigation -->
         <div class="lg:hidden w-full overflow-x-auto whitespace-nowrap hide-scrollbar px-4 sm:px-6 pt-1 pb-1 border-t border-stone-200 dark:border-neutral-700">
             <nav class="flex gap-6" x-show="!loading && !error">
-                        <a href="#salvati" 
+                        <template x-for="(articles, category) in data.categories" :key="category">
+                        
+                    <a :href="'#' + category.replace(/\s+/g, '-').toLowerCase()" 
+                       class="inline-block text-sm px-1 py-2 transition-all duration-200"
+                       :class="activeSection === category.replace(/\s+/g, '-').toLowerCase() ? 'text-stone-900 dark:text-white font-bold underline underline-offset-[6px] decoration-2' : 'text-stone-500 dark:text-stone-400 font-medium'"
+                       x-text="category"></a>
+                </template>
+            
+                  <a href="#salvati" 
                            class="inline-flex items-center gap-1 text-sm px-1 py-2 transition-all duration-200"
                            :class="activeSection === 'salvati' ? 'text-stone-900 dark:text-white font-bold underline underline-offset-[6px] decoration-2' : 'text-stone-500 dark:text-stone-400 font-medium'"
                            x-show="savedArticles.length > 0">
                             <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path d="M5 4a2 2 0 012-2h6a2 2 0 012 2v14l-5-2.5L5 18V4z"></path></svg>
                             Salvati
                         </a>
-                        <template x-for="(articles, category) in data.categories" :key="category">
-                    <a :href="'#' + category.replace(/\s+/g, '-').toLowerCase()" 
-                       class="inline-block text-sm px-1 py-2 transition-all duration-200"
-                       :class="activeSection === category.replace(/\s+/g, '-').toLowerCase() ? 'text-stone-900 dark:text-white font-bold underline underline-offset-[6px] decoration-2' : 'text-stone-500 dark:text-stone-400 font-medium'"
-                       x-text="category"></a>
-                </template>
-            </nav>
+              </nav>
         </div>
         
         
@@ -90,20 +92,22 @@
             <div class="sticky top-24">
                 <h3 class="text-xs font-bold text-stone-900 dark:text-stone-400 uppercase tracking-wider mb-4">Sezioni</h3>
                 <nav class="flex flex-col gap-2" x-show="!loading && !error">
-                        <a href="#salvati" 
+                        <template x-for="(articles, category) in data.categories" :key="category">
+                        
+                        <a :href="'#' + category.replace(/\s+/g, '-').toLowerCase()" 
+                           class="block text-sm transition-all duration-200 py-1.5"
+                           :class="activeSection === category.replace(/\s+/g, '-').toLowerCase() ? 'text-stone-900 dark:text-white font-bold underline underline-offset-[6px] decoration-2' : 'text-stone-500 dark:text-stone-400 font-medium hover:text-stone-800 dark:hover:text-stone-200'"
+                           x-text="category"></a>
+                    </template>
+                
+                  <a href="#salvati" 
                            class="flex items-center justify-between text-sm transition-all duration-200 py-1.5"
                            :class="activeSection === 'salvati' ? 'text-stone-900 dark:text-white font-bold underline underline-offset-[6px] decoration-2' : 'text-stone-500 dark:text-stone-400 font-medium hover:text-stone-800 dark:hover:text-stone-200'"
                            x-show="savedArticles.length > 0">
                             Salvati
                             <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path d="M5 4a2 2 0 012-2h6a2 2 0 012 2v14l-5-2.5L5 18V4z"></path></svg>
                         </a>
-                        <template x-for="(articles, category) in data.categories" :key="category">
-                        <a :href="'#' + category.replace(/\s+/g, '-').toLowerCase()" 
-                           class="block text-sm transition-all duration-200 py-1.5"
-                           :class="activeSection === category.replace(/\s+/g, '-').toLowerCase() ? 'text-stone-900 dark:text-white font-bold underline underline-offset-[6px] decoration-2' : 'text-stone-500 dark:text-stone-400 font-medium hover:text-stone-800 dark:hover:text-stone-200'"
-                           x-text="category"></a>
-                    </template>
-                </nav>
+              </nav>
             </div>
         </aside>
 
@@ -266,6 +270,18 @@
                                 </template>
                             </ul>
                         </div>
+
+                          <!-- Prev/Next Navigation -->
+                          <div class="flex items-center justify-between mt-12 pt-6 border-t border-stone-200 dark:border-neutral-700">
+                              <button @click="prevArticle()" :disabled="!hasPrevArticle()" class="flex items-center gap-2 text-stone-600 dark:text-stone-300 hover:text-indigo-600 dark:hover:text-indigo-400 disabled:opacity-30 disabled:hover:text-stone-600 transition font-medium">
+                                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+                                  Precedente
+                              </button>
+                              <button @click="nextArticle()" :disabled="!hasNextArticle()" class="flex items-center gap-2 text-stone-600 dark:text-stone-300 hover:text-indigo-600 dark:hover:text-indigo-400 disabled:opacity-30 disabled:hover:text-stone-600 transition font-medium">
+                                  Successiva
+                                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+                              </button>
+                          </div>
                     </div>
                 </div>
             </div>

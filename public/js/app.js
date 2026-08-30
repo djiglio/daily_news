@@ -152,15 +152,81 @@ function newsApp() {
                 this.loading = false;
             }
         },
-
-        openArticle(article, category) {
-            this.activeArticle = article;
-            this.activeCategory = category;
+        // Bookmarks Logic
+        toggleSave(article) {
+            if (!article) return;
+            const index = this.savedArticles.findIndex(a => a.title === article.title);
+            if (index > -1) {
+                this.savedArticles.splice(index, 1);
+            } else {
+                this.savedArticles.push(article);
+            }
+            localStorage.setItem('savedArticles', JSON.stringify(this.savedArticles));
+        },
+        isSaved(article) {
+            if (!article) return false;
+            return this.savedArticles.some(a => a.title === article.title);
+        },
+        
+        // TTS Logic
+        toggleSpeech(text) {
+            if (!text) return;
+            if (this.isSpeaking) {
+                window.speechSynthesis.cancel();
+                this.isSpeaking = false;
+                return;
+            }
+            const cleanText = text.replace(/\*\*/g, '');
+            const utterance = new SpeechSynthesisUtterance(cleanText);
+            utterance.lang = 'it-IT';
+            utterance.rate = 1.0;
+            utterance.onend = () => { this.isSpeaking = false; };
+            window.speechSynthesis.speak(utterance);
+            this.isSpeaking = true;
         },
 
+        // Open Article (modified to track index)
+        openArticle(article, category, index) {
+            this.activeArticle = article;
+            this.activeCategory = category;
+            this.currentArticleIndex = index;
+            document.body.style.overflow = 'hidden';
+            if (this.isSpeaking) this.toggleSpeech(''); // Stop speech if open new
+        },
         closeArticle() {
             this.activeArticle = null;
-            this.activeCategory = null;
+            document.body.style.overflow = '';
+            if (this.isSpeaking) this.toggleSpeech(''); // Stop speech on close
+        },
+        
+        // Navigation Logic
+        get currentArticlesList() {
+            if (this.activeSection === 'salvati') {
+                return this.savedArticles;
+            }
+            return this.activeCategory ? this.data.categories[this.activeCategory] : [];
+        },
+        hasNextArticle() {
+            if (!this.currentArticlesList) return false;
+            return this.currentArticleIndex > -1 && this.currentArticleIndex < this.currentArticlesList.length - 1;
+        },
+        hasPrevArticle() {
+            return this.currentArticleIndex > 0;
+        },
+        nextArticle() {
+            if (this.hasNextArticle()) {
+                this.openArticle(this.currentArticlesList[this.currentArticleIndex + 1], this.activeCategory, this.currentArticleIndex + 1);
+                const drawerContent = document.getElementById('drawer-content');
+                if (drawerContent) drawerContent.scrollTop = 0;
+            }
+        },
+        prevArticle() {
+            if (this.hasPrevArticle()) {
+                this.openArticle(this.currentArticlesList[this.currentArticleIndex - 1], this.activeCategory, this.currentArticleIndex - 1);
+                const drawerContent = document.getElementById('drawer-content');
+                if (drawerContent) drawerContent.scrollTop = 0;
+            }
         }
+
     }
 }
