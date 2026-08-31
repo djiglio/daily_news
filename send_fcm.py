@@ -30,7 +30,7 @@ def send_push():
     
     headers = {
         "Authorization": f"Bearer {access_token}",
-        "Content-Type": "application/json; UTF-8"
+        "Content-Type": "application/json; charset=utf-8"
     }
     
     payload = {

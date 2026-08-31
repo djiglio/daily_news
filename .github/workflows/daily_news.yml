@@ -42,7 +42,6 @@ jobs:
           git diff --quiet && git diff --staged --quiet || (git commit -m "chore: Aggiornamento automatico rassegna stampa $(date +'%Y-%m-%d')" && git push)
 
       - name: Send Push Notification (FCM)
-        if: env.FCM_TOKEN != '' && env.FCM_SERVICE_ACCOUNT != ''
         run: |
           pip install google-auth
           python send_fcm.py
