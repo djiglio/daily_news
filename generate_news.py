@@ -135,20 +135,36 @@ Archivio Globale:
     )
     return MasterPlan.model_validate_json(response.text)
 
-def generate_category_drafts(category_name, planned_items, client):
+def generate_category_drafts(category_name, planned_items, global_articles, client):
     logging.info(f"--- FASE 2: SCRITTURA BOZZE PER {category_name} ---")
     
     planned_json = [i.model_dump() for i in planned_items]
+    
+    # Raccogli il testo grezzo solo per gli URL che il Direttore ha assegnato a questa categoria
+    assigned_urls = set()
+    for item in planned_items:
+        for url in item.sources:
+            assigned_urls.add(url)
+            
+    assigned_texts = []
+    for article in global_articles:
+        if article['url'] in assigned_urls:
+            assigned_texts.append(article)
     
     prompt = f"""
 Sei un esperto giornalista. Il tuo Direttore ti ha assegnato 8 notizie per la categoria '{category_name}'.
 Per ciascuna delle 8 notizie fornite, devi scrivere:
 1. Il titolo (copialo identico da quello fornito).
 2. Una sintesi ultrabreve (max 15-20 parole).
-3. Un deep-dive (approfondimento) molto esteso. Esplora il background e gli impatti futuri. Usa paragrafi separati da doppio a capo (\\n\\n) ed evidenzia in **grassetto** solo i concetti chiave.
+3. Un deep-dive (approfondimento) ESTREMAMENTE LUNGO E DETTAGLIATO (minimo 4-5 paragrafi densi di informazioni).
+Non fare riassuntini. Spiega il contesto, i numeri, le citazioni e i retroscena attingendo dai testi grezzi che ti fornisco.
+Usa paragrafi separati da doppio a capo (\\n\\n) ed evidenzia in **grassetto** solo i concetti chiave.
 
-Ecco le notizie assegnate:
+=== LE 8 NOTIZIE DA SCRIVERE (SCALETTA) ===
 {json.dumps(planned_json, ensure_ascii=False, indent=2)}
+
+=== TESTI GREZZI DALLE AGENZIE STAMPA (FONTI DA USARE) ===
+{json.dumps(assigned_texts, ensure_ascii=False, indent=2)}
 """
     
     max_retries = 3
@@ -210,7 +226,7 @@ def main():
         if not planned_items:
             continue
             
-        drafts_obj = generate_category_drafts(cat_name, planned_items, client)
+        drafts_obj = generate_category_drafts(cat_name, planned_items, global_articles, client)
         if drafts_obj:
             cat_list = []
             # Combina dati di pianificazione (score, img, sources) con quelli redatti (summary, deep_dive)
