@@ -124,16 +124,24 @@ REGOLE TASSATIVE:
 Archivio Globale:
 {json.dumps(global_articles, ensure_ascii=False)}
 """
-    response = client.models.generate_content(
-        model='gemini-3.6-flash',
-        contents=prompt,
-        config=types.GenerateContentConfig(
-            response_mime_type="application/json",
-            response_schema=MasterPlan,
-            temperature=0.2
-        ),
-    )
-    return MasterPlan.model_validate_json(response.text)
+    max_retries = 3
+    for attempt in range(max_retries):
+        try:
+            response = client.models.generate_content(
+                model='gemini-3.6-flash',
+                contents=prompt,
+                config=types.GenerateContentConfig(
+                    response_mime_type="application/json",
+                    response_schema=MasterPlan,
+                    temperature=0.2
+                ),
+            )
+            return MasterPlan.model_validate_json(response.text)
+        except Exception as e:
+            logging.error(f"Errore generazione Master Plan (Tentativo {attempt+1}/{max_retries}): {e}")
+            if attempt < max_retries - 1:
+                time.sleep(20)
+    raise Exception("Impossibile generare il Master Plan dopo 3 tentativi.")
 
 def generate_category_drafts(category_name, planned_items, global_articles, client):
     logging.info(f"--- FASE 2: SCRITTURA BOZZE PER {category_name} ---")
@@ -197,12 +205,13 @@ def main():
     
     global_articles = fetch_all_global_news(config, max_items_per_feed)
     
+    import sys
     master_plan = None
     try:
         master_plan = generate_master_plan(global_articles, client)
     except Exception as e:
         logging.error(f"Failed to generate Master Plan: {e}")
-        return
+        sys.exit(1)
         
     final_output = {
         "timestamp": datetime.utcnow().isoformat() + "Z",
