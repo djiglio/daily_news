@@ -128,7 +128,51 @@
         <div x-show="error" x-cloak class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
             <span class="block sm:inline" x-text="error"></span>
         </div><!-- Categories and News -->
-          <div x-show="!loading && !error" x-cloak class="space-y-12">
+          <div x-show="!loading && !error" x-cloak>
+
+          <!-- Briefing Banner -->
+          <div x-show="!searchQuery && data.briefing_text" x-cloak class="mb-10 bg-gradient-to-r from-stone-800 to-stone-900 dark:from-stone-200 dark:to-stone-300 rounded-2xl p-6 shadow-xl flex items-center justify-between text-white dark:text-stone-900">
+              <div>
+                  <h2 class="text-xl font-bold mb-1">Il tuo Briefing</h2>
+                  <p class="text-sm opacity-80">I titoli di oggi in un minuto</p>
+              </div>
+              <button @click="toggleBriefing()" class="w-14 h-14 rounded-full bg-white dark:bg-stone-900 flex items-center justify-center shadow-md transform hover:scale-105 transition">
+                  <svg x-show="!isBriefingPlaying" class="w-6 h-6 text-stone-900 dark:text-white ml-1" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                  <svg x-show="isBriefingPlaying" x-cloak class="w-6 h-6 text-stone-900 dark:text-white" fill="currentColor" viewBox="0 0 24 24"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
+              </button>
+          </div>
+
+          <!-- Search Results -->
+          <section x-show="searchQuery" x-cloak class="mb-12">
+              <h2 class="text-2xl font-bold mb-6 font-serif border-b border-stone-200 dark:border-neutral-700 pb-2">Risultati per "<span x-text="searchQuery"></span>"</h2>
+              <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  <template x-for="(article, index) in searchResults" :key="article.title">
+                      <article @click="openArticle(article, 'Ricerca', index)" class="group cursor-pointer bg-stone-50 dark:bg-neutral-800 rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-shadow border border-stone-100 dark:border-neutral-700 flex flex-col h-full">
+                          <template x-if="article.image_url">
+                              <div class="h-48 overflow-hidden bg-stone-200 dark:bg-neutral-700 relative">
+                                  <img :src="article.image_url" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" loading="lazy">
+                                  <div class="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent opacity-0 group-hover:opacity-100 transition"></div>
+                                  <button @click.stop="toggleSave(article)" class="absolute top-3 right-3 p-2 rounded-full bg-white/50 dark:bg-black/50 backdrop-blur-md hover:bg-white dark:hover:bg-stone-800 transition">
+                                      <svg class="w-5 h-5" :class="isSaved(article) ? 'text-indigo-600 dark:text-indigo-400' : 'text-stone-700 dark:text-stone-300'" :fill="isSaved(article) ? 'currentColor' : 'none'" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"></path></svg>
+                                  </button>
+                              </div>
+                          </template>
+                          <div class="p-6 flex-grow flex flex-col">
+                              <h3 class="text-lg font-bold mb-3 line-clamp-3 leading-snug group-hover:text-stone-600 dark:group-hover:text-stone-300 transition-colors" x-text="article.title"></h3>
+                              <p class="text-stone-600 dark:text-stone-400 text-sm line-clamp-3 flex-grow" x-text="article.summary"></p>
+                          </div>
+                      </article>
+                  </template>
+              </div>
+              <div x-show="searchResults.length === 0" class="text-center py-12 text-stone-500">
+                  Nessun risultato trovato.
+              </div>
+          </section>
+
+          <!-- Dynamic Categories Container (hidden during search) -->
+          <div x-show="!searchQuery" x-cloak class="space-y-12">
+
+
               
               <!-- Salvati Section -->
               <section id="salvati" class="scroll-mt-32" x-show="savedArticles.length > 0">
