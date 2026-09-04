@@ -193,6 +193,37 @@ Usa paragrafi separati da doppio a capo (\\n\\n) ed evidenzia in **grassetto** s
             time.sleep(15)
     return None
 
+
+def generate_briefing(top_news, client):
+    logging.info("--- FASE 4: GENERAZIONE BRIEFING AUDIO ---")
+    
+    # Prepara un riassunto dei titoli per l'AI
+    news_list = "\n".join([f"- {item['title']}: {item['summary']}" for item in top_news])
+    
+    prompt = f"""
+Sei uno speaker radiofonico e conduttore di un telegiornale. Ti fornisco le 8 notizie principali di oggi.
+Devi scrivere un copione fluido, dinamico e accattivante (max 1 minuto di lettura, circa 120-150 parole) che riassuma questi eventi, esattamente come i titoli di testa di un telegiornale.
+Usa un tono professionale ma diretto. Metti in sequenza logica le notizie (es. parti dalle più gravi).
+NON USARE formattazioni, markdown, asterischi o elenchi puntati: scrivi un testo normale, discorsivo, pronto per essere letto ad alta voce da un sintetizzatore vocale.
+
+Le notizie principali:
+{news_list}
+"""
+    try:
+        response = client.models.generate_content(
+            model='gemini-3.6-flash',
+            contents=prompt,
+            config=types.GenerateContentConfig(
+                temperature=0.4
+            ),
+        )
+        # Rimuovi eventuali asterischi che Gemini potrebbe comunque inserire
+        testo = response.text.replace('*', '')
+        return testo.strip()
+    except Exception as e:
+        logging.error(f"Failed to generate briefing: {e}")
+        return "Buongiorno. Le notizie principali di oggi sono in fase di elaborazione. Restate con noi per i prossimi aggiornamenti."
+
 def main():
     api_key = os.environ.get("GEMINI_API_KEY")
     if not api_key:
@@ -270,6 +301,10 @@ def main():
     new_categories = {"Top News": top_news}
     new_categories.update(final_output["categories"])
     final_output["categories"] = new_categories
+    
+    # Genera il briefing
+    briefing_text = generate_briefing(top_news, client)
+    final_output["briefing_text"] = briefing_text
             
     os.makedirs(os.path.dirname(OUTPUT_PATH), exist_ok=True)
     with open(OUTPUT_PATH, 'w', encoding='utf-8') as f:

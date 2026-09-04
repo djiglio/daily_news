@@ -13,6 +13,48 @@ function newsApp() {
         savedArticles: [],
         currentArticleIndex: -1,
         isSpeaking: false,
+        
+        searchQuery: '',
+        isBriefingPlaying: false,
+
+        get searchResults() {
+            if (!this.searchQuery) return [];
+            const q = this.searchQuery.toLowerCase();
+            const results = [];
+            // We use a Set to avoid duplicates if Top News has the same article as another category
+            const seenTitles = new Set();
+            for (const cat in this.data.categories) {
+                this.data.categories[cat].forEach(article => {
+                    if ((article.title.toLowerCase().includes(q) || article.summary.toLowerCase().includes(q)) && !seenTitles.has(article.title)) {
+                        results.push(article);
+                        seenTitles.add(article.title);
+                    }
+                });
+            }
+            return results;
+        },
+
+        toggleBriefing() {
+            if (!this.data.briefing_text) {
+                alert("Il briefing audio non è ancora pronto.");
+                return;
+            }
+            if (this.isBriefingPlaying) {
+                window.speechSynthesis.cancel();
+                this.isBriefingPlaying = false;
+                return;
+            }
+            // Stop any other article reading
+            if (this.isSpeaking) this.toggleSpeech('');
+            
+            const cleanText = this.data.briefing_text.replace(/\*\*/g, '');
+            const utterance = new SpeechSynthesisUtterance(cleanText);
+            utterance.lang = 'it-IT';
+            utterance.rate = 1.0;
+            utterance.onend = () => { this.isBriefingPlaying = false; };
+            window.speechSynthesis.speak(utterance);
+            this.isBriefingPlaying = true;
+        },
 
         initApp() {
             // Check theme preference
