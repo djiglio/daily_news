@@ -31,7 +31,11 @@
     ],
     "Economia": [
       "https://www.ilsole24ore.com/rss/economia.xml",
-      "https://www.repubblica.it/rss/economia/rss2.0.xml"
+      "https://www.repubblica.it/rss/economia/rss2.0.xml",
+      "https://www.milanofinanza.it/rss/news",
+      "https://search.cnbc.com/rs/search/combinedcms/view.xml?profile=120000000&id=10000664",
+      "https://feeds.a.dj.com/rss/WSJcomUSBusiness.xml",
+      "https://finance.yahoo.com/news/rss_us"
     ],
     "Attualità": [
       "https://www.ilpost.it/feed/"
