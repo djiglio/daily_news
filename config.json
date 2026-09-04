@@ -22,7 +22,10 @@
       "https://www.gazzetta.it/rss/calcio.xml",
       "https://www.gazzetta.it/rss/juventus.xml",
       "https://www.corrieredellosport.it/rss/calcio",
-      "https://sport.sky.it/rss/sport_calcio.xml"
+      "https://sport.sky.it/rss/sport_calcio.xml",
+      "http://feeds.bbci.co.uk/sport/football/rss.xml",
+      "https://football-italia.net/feed/",
+      "https://www.tuttosport.com/rss/calcio"
     ],
     "Politica": [
       "https://www.ansa.it/sito/notizie/politica/politica_rss.xml",
@@ -38,7 +41,12 @@
       "https://finance.yahoo.com/news/rss_us"
     ],
     "Attualità": [
-      "https://www.ilpost.it/feed/"
+      "https://www.ilpost.it/feed/",
+      "https://www.rollingstone.it/feed/",
+      "https://www.rockol.it/rss/notizie",
+      "https://www.open.online/feed/",
+      "https://www.vanityfair.it/feed/rss",
+      "https://www.internazionale.it/rss"
     ],
     "Scienze e Tecnologia": [
       "https://www.ansa.it/sito/notizie/tecnologia/tecnologia_rss.xml",
