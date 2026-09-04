@@ -131,14 +131,14 @@
           <div x-show="!loading && !error" x-cloak>
 
           <!-- Briefing Banner -->
-          <div x-show="!searchQuery && data.briefing_text" x-cloak class="mb-10 bg-gradient-to-r from-stone-800 to-stone-900 dark:from-stone-200 dark:to-stone-300 rounded-2xl p-6 shadow-xl flex items-center justify-between text-white dark:text-stone-900">
+          <div x-show="!searchQuery && data.briefing_text" x-cloak class="mb-10 bg-white/60 dark:bg-neutral-800/60 backdrop-blur-md border border-white/40 dark:border-neutral-700/50 rounded-2xl px-5 py-3 shadow-sm flex items-center justify-between text-stone-900 dark:text-white">
               <div>
-                  <h2 class="text-xl font-bold mb-1">Il tuo Briefing</h2>
-                  <p class="text-sm opacity-80">I titoli di oggi in un minuto</p>
+                  <h2 class="text-lg font-bold">Il tuo Briefing</h2>
+                  <p class="text-xs text-stone-600 dark:text-stone-400">I titoli di oggi in un minuto</p>
               </div>
-              <button @click="toggleBriefing()" class="w-14 h-14 rounded-full bg-white dark:bg-stone-900 flex items-center justify-center shadow-md transform hover:scale-105 transition">
-                  <svg x-show="!isBriefingPlaying" class="w-6 h-6 text-stone-900 dark:text-white ml-1" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
-                  <svg x-show="isBriefingPlaying" x-cloak class="w-6 h-6 text-stone-900 dark:text-white" fill="currentColor" viewBox="0 0 24 24"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
+              <button @click="toggleBriefing()" class="w-10 h-10 rounded-full bg-stone-900 dark:bg-white flex items-center justify-center shadow-sm transform hover:scale-105 transition">
+                  <svg x-show="!isBriefingPlaying" class="w-4 h-4 text-white dark:text-stone-900 ml-0.5" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                  <svg x-show="isBriefingPlaying" x-cloak class="w-4 h-4 text-white dark:text-stone-900" fill="currentColor" viewBox="0 0 24 24"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
               </button>
           </div>
 
