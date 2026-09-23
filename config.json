@@ -58,6 +58,6 @@
   },
   "settings": {
     "max_items_per_feed": 20,
-    "max_items_per_category": 7
+    "max_items_per_category": 5
   }
 }

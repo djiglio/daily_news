@@ -23,7 +23,7 @@ class PlannedItem(BaseModel):
     image_url: str = Field(description="URL dell'immagine, vuoto se non disponibile")
 
 class CategoryPlan(BaseModel):
-    items: list[PlannedItem] = Field(description="Esattamente 7 notizie")
+    items: list[PlannedItem] = Field(description="Esattamente 5 notizie")
 
 class MasterPlan(BaseModel):
     Italia: CategoryPlan
@@ -41,7 +41,7 @@ class DraftedItem(BaseModel):
     deep_dive: str = Field(description="Testo lungo, approfondito, in paragrafi divisi da \\n\\n, con grassetti.")
 
 class CategoryDrafts(BaseModel):
-    drafts: list[DraftedItem] = Field(description="Lista delle 7 bozze scritte")
+    drafts: list[DraftedItem] = Field(description="Lista delle 5 bozze scritte")
 
 def load_config():
     with open(CONFIG_PATH, 'r', encoding='utf-8') as f:
@@ -115,10 +115,10 @@ Sei il Direttore Responsabile di una redazione giornalistica. Ti fornisco un eno
 Devi creare la "Scaletta" della giornata per le seguenti 7 categorie: Italia, Mondo, Politica, Economia, Calcio & Sport, Attualità, Scienze e Tecnologia.
 
 REGOLE TASSATIVE:
-1. Scegli ESATTAMENTE 7 notizie per ogni categoria (49 notizie uniche in totale).
+1. Scegli ESATTAMENTE 5 notizie per ogni categoria (35 notizie uniche in totale).
 2. NON CI DEVONO ESSERE DOPPIONI. Ogni notizia può appartenere a UNA E UNA SOLA categoria. 
 3. CROSS-POLLINATION: Puoi combinare più URL grezzi per comporre un singolo evento.
-4. GLOBAL SCORING: Assegna a ciascuna delle 49 notizie un "global_importance_score" da 1 a 100 in base al suo reale impatto geopolitico o istituzionale. Usa voti alti (90-100) per crisi mondiali, guerre, elezioni, riforme economiche epocali. Usa voti bassi (1-30) per gossip, sport o cronaca minore.
+4. GLOBAL SCORING: Assegna a ciascuna delle 35 notizie un "global_importance_score" da 1 a 100 in base al suo reale impatto geopolitico o istituzionale. Usa voti alti (90-100) per crisi mondiali, guerre, elezioni, riforme economiche epocali. Usa voti bassi (1-30) per gossip, sport o cronaca minore.
 5. Per l'immagine, scegli un URL valido tra le chiavi 'image' degli articoli che stai usando per quella notizia.
 
 Archivio Globale:
@@ -160,15 +160,15 @@ def generate_category_drafts(category_name, planned_items, global_articles, clie
             assigned_texts.append(article)
     
     prompt = f"""
-Sei un esperto giornalista. Il tuo Direttore ti ha assegnato 7 notizie per la categoria '{category_name}'.
-Per ciascuna delle 7 notizie fornite, devi scrivere:
+Sei un esperto giornalista. Il tuo Direttore ti ha assegnato 5 notizie per la categoria '{category_name}'.
+Per ciascuna delle 5 notizie fornite, devi scrivere:
 1. Il titolo (copialo identico da quello fornito).
 2. Una sintesi ultrabreve (max 15-20 parole).
 3. Un deep-dive (approfondimento) ESTREMAMENTE LUNGO E DETTAGLIATO (minimo 4-5 paragrafi densi di informazioni).
 Non fare riassuntini. Spiega il contesto, i numeri, le citazioni e i retroscena attingendo dai testi grezzi che ti fornisco.
 Usa paragrafi separati da doppio a capo (\\n\\n) ed evidenzia in **grassetto** solo i concetti chiave.
 
-=== LE 7 NOTIZIE DA SCRIVERE (SCALETTA) ===
+=== LE 5 NOTIZIE DA SCRIVERE (SCALETTA) ===
 {json.dumps(planned_json, ensure_ascii=False, indent=2)}
 
 === TESTI GREZZI DALLE AGENZIE STAMPA (FONTI DA USARE) ===
