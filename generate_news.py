@@ -15,6 +15,9 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(
 CONFIG_PATH = 'config.json'
 OUTPUT_PATH = 'public/data/news_today.json'
 
+# Modelli candidati: se il primo è in sovraccarico (503 Service Unavailable), scala automaticamente sui successivi
+CANDIDATE_MODELS = ['gemini-3.6-flash', 'gemini-2.5-flash', 'gemini-2.0-flash']
+
 # --- PYDANTIC SCHEMAS FOR PHASE 1 ---
 class PlannedItem(BaseModel):
     title: str = Field(description="Titolo informativo e chiaro")
@@ -108,10 +111,60 @@ def fetch_all_global_news(config, max_items_per_feed):
     logging.info(f"--- RACCOLTA COMPLETATA: {len(global_articles)} articoli trovati ---")
     return global_articles
 
+def generate_content_resilient(client, prompt, schema=None, temperature=0.2):
+    """
+    Chiama l'API Gemini gestendo automaticamente il sovraccarico dei server (503 Service Unavailable).
+    Se un modello è congestionato, applica backoff e scala in automatico sui modelli di fallback.
+    """
+    last_error = None
+    for model_name in CANDIDATE_MODELS:
+        for attempt in range(1, 4):
+            try:
+                logging.info(f"Chiamata Gemini ({model_name}) - Tentativo {attempt}/3...")
+                config_args = {"temperature": temperature}
+                if schema:
+                    config_args["response_mime_type"] = "application/json"
+                    config_args["response_schema"] = schema
+                
+                response = client.models.generate_content(
+                    model=model_name,
+                    contents=prompt,
+                    config=types.GenerateContentConfig(**config_args)
+                )
+                return response
+            except Exception as e:
+                last_error = e
+                err_str = str(e)
+                logging.warning(f"Errore con {model_name} (Tentativo {attempt}/3): {err_str}")
+                
+                # Se il modello non esiste sull'account (404), passa subito al modello successivo
+                if "404" in err_str or "NOT_FOUND" in err_str or "not found" in err_str.lower():
+                    logging.info(f"Modello {model_name} non disponibile, passo al successivo.")
+                    break
+                    
+                # Se è 503 (High Demand / Service Unavailable) o 429 (Quota), attendi con backoff esponenziale
+                wait_time = attempt * 20
+                logging.info(f"Attesa di {wait_time}s prima di riprovare...")
+                time.sleep(wait_time)
+                
+    raise Exception(f"Tutti i modelli hanno fallito. Ultimo errore: {last_error}")
+
 def generate_master_plan(global_articles, client):
     logging.info("--- FASE 1: GENERAZIONE MASTER PLAN ---")
+    
+    # Per la Fase 1 basta il titolo e un estratto breve (300 caratteri) per non sovraccaricare l'API con prompt enormi
+    lightweight_articles = [
+        {
+            'url': a['url'],
+            'title': a['title'],
+            'image': a.get('image', ''),
+            'text': a['text'][:300]
+        }
+        for a in global_articles
+    ]
+    
     prompt = f"""
-Sei il Direttore Responsabile di una redazione giornalistica. Ti fornisco un enorme archivio di articoli grezzi delle ultime 24 ore.
+Sei il Direttore Responsabile di una redazione giornalistica. Ti fornisco un archivio di notizie delle ultime 24 ore.
 Devi creare la "Scaletta" della giornata per le seguenti 7 categorie: Italia, Mondo, Politica, Economia, Calcio & Sport, Attualità, Scienze e Tecnologia.
 
 REGOLE TASSATIVE:
@@ -121,27 +174,11 @@ REGOLE TASSATIVE:
 4. GLOBAL SCORING: Assegna a ciascuna delle 35 notizie un "global_importance_score" da 1 a 100 in base al suo reale impatto geopolitico o istituzionale. Usa voti alti (90-100) per crisi mondiali, guerre, elezioni, riforme economiche epocali. Usa voti bassi (1-30) per gossip, sport o cronaca minore.
 5. Per l'immagine, scegli un URL valido tra le chiavi 'image' degli articoli che stai usando per quella notizia.
 
-Archivio Globale:
-{json.dumps(global_articles, ensure_ascii=False)}
+Archivio Notizie:
+{json.dumps(lightweight_articles, ensure_ascii=False)}
 """
-    max_retries = 3
-    for attempt in range(max_retries):
-        try:
-            response = client.models.generate_content(
-                model='gemini-3.6-flash',
-                contents=prompt,
-                config=types.GenerateContentConfig(
-                    response_mime_type="application/json",
-                    response_schema=MasterPlan,
-                    temperature=0.2
-                ),
-            )
-            return MasterPlan.model_validate_json(response.text)
-        except Exception as e:
-            logging.error(f"Errore generazione Master Plan (Tentativo {attempt+1}/{max_retries}): {e}")
-            if attempt < max_retries - 1:
-                time.sleep(20)
-    raise Exception("Impossibile generare il Master Plan dopo 3 tentativi.")
+    response = generate_content_resilient(client, prompt, schema=MasterPlan, temperature=0.2)
+    return MasterPlan.model_validate_json(response.text)
 
 def generate_category_drafts(category_name, planned_items, global_articles, client):
     logging.info(f"--- FASE 2: SCRITTURA BOZZE PER {category_name} ---")
@@ -167,6 +204,7 @@ Per ciascuna delle 5 notizie fornite, devi scrivere:
 3. Un deep-dive (approfondimento) ESTREMAMENTE LUNGO E DETTAGLIATO (minimo 4-5 paragrafi densi di informazioni).
 Non fare riassuntini. Spiega il contesto, i numeri, le citazioni e i retroscena attingendo dai testi grezzi che ti fornisco.
 Usa paragrafi separati da doppio a capo (\\n\\n) ed evidenzia in **grassetto** solo i concetti chiave.
+4. Fai un CONTROLLO RIGOROSO DI GRAMMATICA E ORTOGRAFIA prima di finalizzare il testo: assicurati che l'italiano sia impeccabile, senza refusi o errori sintattici.
 
 === LE 5 NOTIZIE DA SCRIVERE (SCALETTA) ===
 {json.dumps(planned_json, ensure_ascii=False, indent=2)}
@@ -174,25 +212,12 @@ Usa paragrafi separati da doppio a capo (\\n\\n) ed evidenzia in **grassetto** s
 === TESTI GREZZI DALLE AGENZIE STAMPA (FONTI DA USARE) ===
 {json.dumps(assigned_texts, ensure_ascii=False, indent=2)}
 """
-    
-    max_retries = 3
-    for attempt in range(max_retries):
-        try:
-            response = client.models.generate_content(
-                model='gemini-3.6-flash',
-                contents=prompt,
-                config=types.GenerateContentConfig(
-                    response_mime_type="application/json",
-                    response_schema=CategoryDrafts,
-                    temperature=0.3
-                ),
-            )
-            return CategoryDrafts.model_validate_json(response.text)
-        except Exception as e:
-            logging.error(f"Errore scrittura {category_name} (Tentativo {attempt+1}): {e}")
-            time.sleep(15)
-    return None
-
+    try:
+        response = generate_content_resilient(client, prompt, schema=CategoryDrafts, temperature=0.3)
+        return CategoryDrafts.model_validate_json(response.text)
+    except Exception as e:
+        logging.error(f"Errore scrittura {category_name}: {e}")
+        return None
 
 def generate_briefing(top_news, client):
     logging.info("--- FASE 4: GENERAZIONE BRIEFING AUDIO ---")
@@ -210,14 +235,7 @@ Le notizie principali:
 {news_list}
 """
     try:
-        response = client.models.generate_content(
-            model='gemini-3.6-flash',
-            contents=prompt,
-            config=types.GenerateContentConfig(
-                temperature=0.4
-            ),
-        )
-        # Rimuovi eventuali asterischi che Gemini potrebbe comunque inserire
+        response = generate_content_resilient(client, prompt, schema=None, temperature=0.4)
         testo = response.text.replace('*', '')
         return testo.strip()
     except Exception as e:
@@ -291,7 +309,7 @@ def main():
         time.sleep(15) # rate limit
         
     # --- FASE 3: GENERAZIONE TOP NEWS ---
-    # Ordina TUTTE le 56 notizie per punteggio globale decrescente
+    # Ordina TUTTE le 35 notizie per punteggio globale decrescente
     all_final_items.sort(key=lambda x: x["global_importance_score"], reverse=True)
     
     # Prendi le prime 7 in assoluto per le "Top News"
