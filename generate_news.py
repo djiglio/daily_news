@@ -15,8 +15,8 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(
 CONFIG_PATH = 'config.json'
 OUTPUT_PATH = 'public/data/news_today.json'
 
-# Modelli candidati: se il primo è in sovraccarico (503 Service Unavailable), scala automaticamente sui successivi
-CANDIDATE_MODELS = ['gemini-3.6-flash', 'gemini-2.5-flash', 'gemini-2.0-flash']
+# Modelli candidati: gemini-3.8-flash è il modello principale raccomandato da Google.
+CANDIDATE_MODELS = ['gemini-3.8-flash', 'gemini-3.6-flash']
 
 # --- PYDANTIC SCHEMAS FOR PHASE 1 ---
 class PlannedItem(BaseModel):
@@ -242,13 +242,39 @@ Le notizie principali:
         logging.error(f"Failed to generate briefing: {e}")
         return "Buongiorno. Le notizie principali di oggi sono in fase di elaborazione. Restate con noi per i prossimi aggiornamenti."
 
+def get_candidate_models(client):
+    preferred = ['gemini-3.8-flash', 'gemini-3.6-flash']
+    try:
+        discovered = []
+        for m in client.models.list():
+            name = m.name.replace("models/", "")
+            if "flash" in name and "generateContent" in (m.supported_actions or []):
+                discovered.append(name)
+        # Esclude modelli obsoleti (2.x)
+        discovered = [m for m in discovered if not m.startswith('gemini-2.')]
+        result = [m for m in preferred if m in discovered]
+        for m in discovered:
+            if m not in result:
+                result.append(m)
+        if result:
+            logging.info(f"Modelli Gemini disponibili rilevati da API: {result}")
+            return result
+    except Exception as e:
+        logging.warning(f"Impossibile elencare i modelli via API: {e}")
+    return preferred
+
 def main():
+    global CANDIDATE_MODELS
     api_key = os.environ.get("GEMINI_API_KEY")
     if not api_key:
         logging.error("GEMINI_API_KEY is not set.")
         return
         
     client = genai.Client(api_key=api_key)
+    discovered = get_candidate_models(client)
+    if discovered:
+        CANDIDATE_MODELS = discovered
+
     config = load_config()
     max_items_per_feed = config.get("settings", {}).get("max_items_per_feed", 10)
     
