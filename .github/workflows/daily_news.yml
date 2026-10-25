@@ -1,4 +1,4 @@
-name: Daily News Generator
+﻿name: Daily News Generator
 
 on:
   workflow_dispatch: # Avvio manuale
@@ -8,6 +8,7 @@ on:
 jobs:
   generate:
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     permissions:
       contents: write
     env:
@@ -42,6 +43,4 @@ jobs:
           git diff --quiet && git diff --staged --quiet || (git commit -m "chore: Aggiornamento automatico rassegna stampa $(date +'%Y-%m-%d')" && git push)
 
       - name: Send Push Notification (FCM)
-        run: |
-          pip install google-auth
-          python send_fcm.py
+        run: python send_fcm.py

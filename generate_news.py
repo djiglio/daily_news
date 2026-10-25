@@ -1,9 +1,11 @@
-import os
+﻿import os
 import json
 import logging
+import re
 from datetime import datetime, timedelta
 import calendar
 import time
+from concurrent.futures import ThreadPoolExecutor
 import feedparser
 import trafilatura
 from pydantic import BaseModel, Field
@@ -15,7 +17,7 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(
 CONFIG_PATH = 'config.json'
 OUTPUT_PATH = 'public/data/news_today.json'
 
-# Modelli candidati: gemini-3.8-flash è il modello principale raccomandato da Google.
+# Modelli candidati: gemini-3.8-flash e il modello principale raccomandato da Google
 CANDIDATE_MODELS = ['gemini-3.8-flash', 'gemini-3.6-flash']
 
 # --- PYDANTIC SCHEMAS FOR PHASE 1 ---
@@ -39,7 +41,7 @@ class MasterPlan(BaseModel):
 
 # --- PYDANTIC SCHEMAS FOR PHASE 2 ---
 class DraftedItem(BaseModel):
-    title: str = Field(description="Il titolo esatto che ti è stato fornito nella scaletta")
+    title: str = Field(description="Il titolo esatto che ti e stato fornito nella scaletta")
     summary: str = Field(description="Sintesi ultrabreve (max 15-20 parole)")
     deep_dive: str = Field(description="Testo lungo, approfondito, in paragrafi divisi da \\n\\n, con grassetti.")
 
@@ -50,72 +52,83 @@ def load_config():
     with open(CONFIG_PATH, 'r', encoding='utf-8') as f:
         return json.load(f)
 
-def fetch_rss_feed(url, max_items):
-    logging.info(f"Fetching RSS: {url}")
-    feed = feedparser.parse(url, agent='Mozilla/5.0 (Windows NT 10.0; Win64; x64)')
-    recent_entries = []
-    now = datetime.utcnow()
-    
-    for entry in feed.entries:
-        entry_time_struct = entry.get('published_parsed') or entry.get('updated_parsed')
-        if entry_time_struct:
-            entry_dt = datetime.utcfromtimestamp(calendar.timegm(entry_time_struct))
-            if now - entry_dt <= timedelta(days=1):
-                recent_entries.append(entry)
-        else:
-            recent_entries.append(entry)
-            
-        if len(recent_entries) >= max_items:
-            break
-    return recent_entries
+def clean_html(raw_html):
+    if not raw_html:
+        return ""
+    clean = re.sub(r'<[^>]+>', ' ', raw_html)
+    return ' '.join(clean.split())
 
-def scrape_text(url):
+def extract_image_from_entry(entry):
+    if 'media_content' in entry:
+        for media in entry['media_content']:
+            if media.get('url'):
+                return media['url']
+    if 'media_thumbnail' in entry and len(entry['media_thumbnail']) > 0:
+        return entry['media_thumbnail'][0].get('url', '')
+    if 'enclosures' in entry:
+        for enc in entry['enclosures']:
+            if 'image' in enc.get('type', '') or enc.get('href', '').endswith(('.jpg', '.jpeg', '.png', '.webp')):
+                return enc.get('href') or enc.get('url', '')
+    if 'links' in entry:
+        for link in entry['links']:
+            if 'image' in link.get('type', ''):
+                return link.get('href', '')
+    return ""
+
+def fetch_single_feed(url, max_items):
+    entries_data = []
     try:
-        downloaded = trafilatura.fetch_url(url)
-        if downloaded:
-            text = trafilatura.extract(downloaded)
-            metadata = trafilatura.extract_metadata(downloaded)
-            image = metadata.image if metadata else ""
-            return text, image
+        feed = feedparser.parse(url, agent='Mozilla/5.0 (Windows NT 10.0; Win64; x64)')
+        now = datetime.utcnow()
+        for entry in feed.entries:
+            entry_time_struct = entry.get('published_parsed') or entry.get('updated_parsed')
+            if entry_time_struct:
+                entry_dt = datetime.utcfromtimestamp(calendar.timegm(entry_time_struct))
+                if now - entry_dt > timedelta(days=1):
+                    continue
+            link = getattr(entry, 'link', '')
+            title = getattr(entry, 'title', '')
+            if not link or not title:
+                continue
+            
+            raw_summary = entry.get('summary', '') or entry.get('description', '')
+            clean_summary = clean_html(raw_summary)[:300]
+            img = extract_image_from_entry(entry)
+            
+            entries_data.append({
+                'url': link,
+                'title': title,
+                'image': img,
+                'text': clean_summary
+            })
+            if len(entries_data) >= max_items:
+                break
     except Exception as e:
-        logging.warning(f"Failed to scrape {url}: {e}")
-    return None, ""
+        logging.warning(f"Error fetching feed {url}: {e}")
+    return entries_data
 
 def fetch_all_global_news(config, max_items_per_feed):
-    logging.info("--- INIZIO RACCOLTA GLOBALE DELLE NOTIZIE ---")
-    global_articles = []
-    seen_urls = set()
-    
+    logging.info("--- INIZIO RACCOLTA NOTIZIE DAI FEED RSS (PARALLELA) ---")
     all_feed_urls = set()
     for feeds in config["categories"].values():
         for url in feeds:
             all_feed_urls.add(url)
             
-    for url in all_feed_urls:
-        entries = fetch_rss_feed(url, max_items_per_feed)
-        for entry in entries:
-            link = entry.link
-            if link in seen_urls:
-                continue
-                
-            seen_urls.add(link)
-            text, image_url = scrape_text(link)
-            if text:
-                global_articles.append({
-                    'url': link,
-                    'title': entry.title,
-                    'image': image_url or "",
-                    'text': text[:1000]  # truncate strictly to fit large JSON in prompt
-                })
-                
-    logging.info(f"--- RACCOLTA COMPLETATA: {len(global_articles)} articoli trovati ---")
+    global_articles = []
+    seen_urls = set()
+    
+    with ThreadPoolExecutor(max_workers=10) as executor:
+        futures = [executor.submit(fetch_single_feed, url, max_items_per_feed) for url in all_feed_urls]
+        for f in futures:
+            for item in f.result():
+                if item['url'] not in seen_urls:
+                    seen_urls.add(item['url'])
+                    global_articles.append(item)
+                    
+    logging.info(f"--- RACCOLTA COMPLETATA: {len(global_articles)} notizie trovate istantaneamente ---")
     return global_articles
 
 def generate_content_resilient(client, prompt, schema=None, temperature=0.2):
-    """
-    Chiama l'API Gemini gestendo automaticamente il sovraccarico dei server (503 Service Unavailable).
-    Se un modello è congestionato, applica backoff e scala in automatico sui modelli di fallback.
-    """
     last_error = None
     for model_name in CANDIDATE_MODELS:
         for attempt in range(1, 4):
@@ -137,13 +150,11 @@ def generate_content_resilient(client, prompt, schema=None, temperature=0.2):
                 err_str = str(e)
                 logging.warning(f"Errore con {model_name} (Tentativo {attempt}/3): {err_str}")
                 
-                # Se il modello non esiste sull'account (404), passa subito al modello successivo
                 if "404" in err_str or "NOT_FOUND" in err_str or "not found" in err_str.lower():
                     logging.info(f"Modello {model_name} non disponibile, passo al successivo.")
                     break
                     
-                # Se è 503 (High Demand / Service Unavailable) o 429 (Quota), attendi con backoff esponenziale
-                wait_time = attempt * 20
+                wait_time = attempt * 15
                 logging.info(f"Attesa di {wait_time}s prima di riprovare...")
                 time.sleep(wait_time)
                 
@@ -152,7 +163,6 @@ def generate_content_resilient(client, prompt, schema=None, temperature=0.2):
 def generate_master_plan(global_articles, client):
     logging.info("--- FASE 1: GENERAZIONE MASTER PLAN ---")
     
-    # Per la Fase 1 basta il titolo e un estratto breve (300 caratteri) per non sovraccaricare l'API con prompt enormi
     lightweight_articles = [
         {
             'url': a['url'],
@@ -165,14 +175,14 @@ def generate_master_plan(global_articles, client):
     
     prompt = f"""
 Sei il Direttore Responsabile di una redazione giornalistica. Ti fornisco un archivio di notizie delle ultime 24 ore.
-Devi creare la "Scaletta" della giornata per le seguenti 7 categorie: Italia, Mondo, Politica, Economia, Calcio & Sport, Attualità, Scienze e Tecnologia.
+Devi creare la "Scaletta" della giornata per le seguenti 7 categorie: Italia, Mondo, Politica, Economia, Calcio & Sport, Attualita, Scienze e Tecnologia.
 
 REGOLE TASSATIVE:
 1. Scegli ESATTAMENTE 5 notizie per ogni categoria (35 notizie uniche in totale).
-2. NON CI DEVONO ESSERE DOPPIONI. Ogni notizia può appartenere a UNA E UNA SOLA categoria. 
-3. CROSS-POLLINATION: Puoi combinare più URL grezzi per comporre un singolo evento.
+2. NON CI DEVONO ESSERE DOPPIONI. Ogni notizia puo appartenere a UNA E UNA SOLA categoria. 
+3. CROSS-POLLINATION: Puoi combinare piu URL grezzi per comporre un singolo evento.
 4. GLOBAL SCORING: Assegna a ciascuna delle 35 notizie un "global_importance_score" da 1 a 100 in base al suo reale impatto geopolitico o istituzionale. Usa voti alti (90-100) per crisi mondiali, guerre, elezioni, riforme economiche epocali. Usa voti bassi (1-30) per gossip, sport o cronaca minore.
-5. Per l'immagine, scegli un URL valido tra le chiavi 'image' degli articoli che stai usando per quella notizia.
+5. Per l'immagine, scegli un URL valido tra le chiavi 'image' degli articoli che stai usando per quella notizia (se presente).
 
 Archivio Notizie:
 {json.dumps(lightweight_articles, ensure_ascii=False)}
@@ -180,21 +190,41 @@ Archivio Notizie:
     response = generate_content_resilient(client, prompt, schema=MasterPlan, temperature=0.2)
     return MasterPlan.model_validate_json(response.text)
 
-def generate_category_drafts(category_name, planned_items, global_articles, client):
+def scrape_single_url(url):
+    try:
+        downloaded = trafilatura.fetch_url(url)
+        if downloaded:
+            text = trafilatura.extract(downloaded) or ""
+            metadata = trafilatura.extract_metadata(downloaded)
+            image = metadata.image if metadata else ""
+            return url, text[:2500], image
+    except Exception as e:
+        logging.warning(f"Failed to scrape {url}: {e}")
+    return url, "", ""
+
+def scrape_selected_articles(urls):
+    logging.info(f"--- FASE 1.5: SCRAPING PARALLELO DI {len(urls)} ARTICOLI SCELTI ---")
+    scraped_data = {}
+    with ThreadPoolExecutor(max_workers=10) as executor:
+        results = executor.map(scrape_single_url, urls)
+        for url, text, image in results:
+            scraped_data[url] = {"text": text, "image": image}
+    logging.info("--- SCRAPING PARALLELO COMPLETATO ---")
+    return scraped_data
+
+def generate_category_drafts(category_name, planned_items, scraped_data, client):
     logging.info(f"--- FASE 2: SCRITTURA BOZZE PER {category_name} ---")
     
     planned_json = [i.model_dump() for i in planned_items]
     
-    # Raccogli il testo grezzo solo per gli URL che il Direttore ha assegnato a questa categoria
-    assigned_urls = set()
+    assigned_texts = []
     for item in planned_items:
         for url in item.sources:
-            assigned_urls.add(url)
-            
-    assigned_texts = []
-    for article in global_articles:
-        if article['url'] in assigned_urls:
-            assigned_texts.append(article)
+            if url in scraped_data and scraped_data[url]["text"]:
+                assigned_texts.append({
+                    "url": url,
+                    "text": scraped_data[url]["text"]
+                })
     
     prompt = f"""
 Sei un esperto giornalista. Il tuo Direttore ti ha assegnato 5 notizie per la categoria '{category_name}'.
@@ -222,13 +252,12 @@ Usa paragrafi separati da doppio a capo (\\n\\n) ed evidenzia in **grassetto** s
 def generate_briefing(top_news, client):
     logging.info("--- FASE 4: GENERAZIONE BRIEFING AUDIO ---")
     
-    # Prepara un riassunto dei titoli per l'AI
     news_list = "\n".join([f"- {item['title']}: {item['summary']}" for item in top_news])
     
     prompt = f"""
 Sei uno speaker radiofonico e conduttore di un telegiornale. Ti fornisco le 7 notizie principali di oggi.
 Devi scrivere un copione fluido, dinamico e accattivante (max 1 minuto di lettura, circa 120-150 parole) che riassuma questi eventi, esattamente come i titoli di testa di un telegiornale.
-Usa un tono professionale ma diretto. Metti in sequenza logica le notizie (es. parti dalle più gravi).
+Usa un tono professionale ma diretto. Metti in sequenza logica le notizie (es. parti dalle piu gravi).
 NON USARE formattazioni, markdown, asterischi o elenchi puntati: scrivi un testo normale, discorsivo, pronto per essere letto ad alta voce da un sintetizzatore vocale.
 
 Le notizie principali:
@@ -250,7 +279,6 @@ def get_candidate_models(client):
             name = m.name.replace("models/", "")
             if "flash" in name and "generateContent" in (m.supported_actions or []):
                 discovered.append(name)
-        # Esclude modelli obsoleti (2.x)
         discovered = [m for m in discovered if not m.startswith('gemini-2.')]
         result = [m for m in preferred if m in discovered]
         for m in discovered:
@@ -293,9 +321,6 @@ def main():
         "categories": {}
     }
     
-    all_final_items = []
-    
-    # Mappatura plan_fields a stringhe categoria
     cat_map = {
         "Italia": master_plan.Italia.items,
         "Mondo": master_plan.Mondo.items,
@@ -306,14 +331,33 @@ def main():
         "Scienze e Tecnologia": master_plan.Scienze_Tecnologia.items
     }
     
+    # Raccogli tutti gli URL unici scelti dal Master Plan per fare scraping solo di questi
+    all_chosen_urls = set()
+    for planned_items in cat_map.values():
+        for item in planned_items:
+            for url in item.sources:
+                all_chosen_urls.add(url)
+                
+    scraped_data = scrape_selected_articles(all_chosen_urls)
+    
+    # Backfill delle immagini se il Master Plan non ne aveva trovata una
+    for planned_items in cat_map.values():
+        for item in planned_items:
+            if not item.image_url:
+                for url in item.sources:
+                    if url in scraped_data and scraped_data[url]["image"]:
+                        item.image_url = scraped_data[url]["image"]
+                        break
+                        
+    all_final_items = []
+    
     for cat_name, planned_items in cat_map.items():
         if not planned_items:
             continue
             
-        drafts_obj = generate_category_drafts(cat_name, planned_items, global_articles, client)
+        drafts_obj = generate_category_drafts(cat_name, planned_items, scraped_data, client)
         if drafts_obj:
             cat_list = []
-            # Combina dati di pianificazione (score, img, sources) con quelli redatti (summary, deep_dive)
             for plan in planned_items:
                 draft = next((d for d in drafts_obj.drafts if d.title == plan.title), None)
                 if draft:
@@ -328,20 +372,15 @@ def main():
                     cat_list.append(combined)
                     all_final_items.append(combined)
             
-            # Ordinamento della categoria per punteggio
             cat_list.sort(key=lambda x: x["global_importance_score"], reverse=True)
             final_output["categories"][cat_name] = cat_list
             
-        time.sleep(15) # rate limit
+        time.sleep(3) # Pausa breve per stare sotto 15 RPM senza sprecare minuti
         
     # --- FASE 3: GENERAZIONE TOP NEWS ---
-    # Ordina TUTTE le 35 notizie per punteggio globale decrescente
     all_final_items.sort(key=lambda x: x["global_importance_score"], reverse=True)
-    
-    # Prendi le prime 7 in assoluto per le "Top News"
     top_news = all_final_items[:7]
     
-    # Inseriamo Top News come prima categoria nel dizionario finale (Python 3.7+ mantiene l'ordine di inserimento)
     new_categories = {"Top News": top_news}
     new_categories.update(final_output["categories"])
     final_output["categories"] = new_categories
