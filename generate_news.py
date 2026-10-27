@@ -5,8 +5,8 @@ import re
 from datetime import datetime, timedelta
 import calendar
 import time
-import threading
 from concurrent.futures import ThreadPoolExecutor
+import requests
 import feedparser
 import trafilatura
 from pydantic import BaseModel, Field
@@ -18,11 +18,12 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(
 CONFIG_PATH = 'config.json'
 OUTPUT_PATH = 'public/data/news_today.json'
 
-# Lock di sincronizzazione per proteggere lxml/libxml2 (non e thread-safe nel C) ed evitare crash "free(): invalid pointer"
-extract_lock = threading.Lock()
-
 # Modelli candidati: gemini-3.8-flash e il modello principale raccomandato da Google
 CANDIDATE_MODELS = ['gemini-3.8-flash', 'gemini-3.6-flash']
+
+HEADERS = {
+    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36'
+}
 
 # --- PYDANTIC SCHEMAS FOR PHASE 1 ---
 class PlannedItem(BaseModel):
@@ -82,7 +83,7 @@ def extract_image_from_entry(entry):
 def fetch_single_feed(url, max_items):
     entries_data = []
     try:
-        feed = feedparser.parse(url, agent='Mozilla/5.0 (Windows NT 10.0; Win64; x64)')
+        feed = feedparser.parse(url, agent=HEADERS['User-Agent'])
         now = datetime.utcnow()
         for entry in feed.entries:
             entry_time_struct = entry.get('published_parsed') or entry.get('updated_parsed')
@@ -96,7 +97,7 @@ def fetch_single_feed(url, max_items):
                 continue
             
             raw_summary = entry.get('summary', '') or entry.get('description', '')
-            clean_summary = clean_html(raw_summary)[:200]
+            clean_summary = clean_html(raw_summary)[:300]
             img = extract_image_from_entry(entry)
             
             entries_data.append({
@@ -172,7 +173,7 @@ def generate_master_plan(global_articles, client):
             'url': a['url'],
             'title': a['title'],
             'image': a.get('image', ''),
-            'text': a['text'][:150]
+            'text': a['text'][:300]
         }
         for a in global_articles
     ]
@@ -194,28 +195,39 @@ Archivio Notizie:
     response = generate_content_resilient(client, prompt, schema=MasterPlan, temperature=0.2)
     return MasterPlan.model_validate_json(response.text)
 
-def scrape_single_url(url):
+def download_html(url):
     try:
-        downloaded = trafilatura.fetch_url(url)
-        if downloaded:
-            # lxml parsing isolato con lock per totale stabilita C/libxml2
-            with extract_lock:
-                text = trafilatura.extract(downloaded) or ""
-                metadata = trafilatura.extract_metadata(downloaded)
-                image = metadata.image if metadata else ""
-            return url, text[:2500], image
+        resp = requests.get(url, headers=HEADERS, timeout=10)
+        if resp.status_code == 200 and resp.text:
+            return url, resp.text
     except Exception as e:
-        logging.warning(f"Failed to scrape {url}: {e}")
-    return url, "", ""
+        logging.warning(f"Failed to download {url}: {e}")
+    return url, None
 
 def scrape_selected_articles(urls):
-    logging.info(f"--- FASE 1.5: SCRAPING PARALLELO DI {len(urls)} ARTICOLI SCELTI ---")
+    logging.info(f"--- FASE 1.5: DOWNLOAD PARALLELO E PARSING SICURO DI {len(urls)} FONTI ---")
     scraped_data = {}
-    with ThreadPoolExecutor(max_workers=5) as executor:
-        results = executor.map(scrape_single_url, urls)
-        for url, text, image in results:
-            scraped_data[url] = {"text": text, "image": image}
-    logging.info("--- SCRAPING PARALLELO COMPLETATO ---")
+    
+    # 1. Download HTTP in parallelo con requests (100% thread-safe in Python)
+    downloaded_pages = []
+    with ThreadPoolExecutor(max_workers=8) as executor:
+        downloaded_pages = list(executor.map(download_html, urls))
+        
+    # 2. Parsing HTML con trafilatura/lxml nel main thread (evita qualsiasi crash C "free(): invalid pointer")
+    for url, html in downloaded_pages:
+        if html:
+            try:
+                text = trafilatura.extract(html) or ""
+                metadata = trafilatura.extract_metadata(html)
+                image = metadata.image if metadata else ""
+                scraped_data[url] = {"text": text[:2500], "image": image}
+            except Exception as e:
+                logging.warning(f"Failed to parse HTML for {url}: {e}")
+                scraped_data[url] = {"text": "", "image": ""}
+        else:
+            scraped_data[url] = {"text": "", "image": ""}
+            
+    logging.info("--- SCRAPING COMPLETATO IN SICUREZZA ---")
     return scraped_data
 
 def generate_category_drafts(category_name, planned_items, scraped_data, client):
@@ -310,7 +322,7 @@ def main():
         CANDIDATE_MODELS = discovered
 
     config = load_config()
-    max_items_per_feed = config.get("settings", {}).get("max_items_per_feed", 8)
+    max_items_per_feed = config.get("settings", {}).get("max_items_per_feed", 20)
     
     global_articles = fetch_all_global_news(config, max_items_per_feed)
     
@@ -337,11 +349,11 @@ def main():
         "Scienze e Tecnologia": master_plan.Scienze_Tecnologia.items
     }
     
-    # Raccogli tutti gli URL unici scelti dal Master Plan per fare scraping solo di questi (max 2 per notizia)
+    # Raccogli TUTTI gli URL scelti dal Master Plan senza alcun taglio sulle fonti
     all_chosen_urls = set()
     for planned_items in cat_map.values():
         for item in planned_items:
-            for url in item.sources[:2]:
+            for url in item.sources:
                 all_chosen_urls.add(url)
                 
     scraped_data = scrape_selected_articles(all_chosen_urls)
@@ -381,7 +393,7 @@ def main():
             cat_list.sort(key=lambda x: x["global_importance_score"], reverse=True)
             final_output["categories"][cat_name] = cat_list
             
-        time.sleep(3) # Pausa breve per stare sotto 15 RPM senza sprecare minuti
+        time.sleep(3)
         
     # --- FASE 3: GENERAZIONE TOP NEWS ---
     all_final_items.sort(key=lambda x: x["global_importance_score"], reverse=True)
