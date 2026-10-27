@@ -5,6 +5,7 @@ import re
 from datetime import datetime, timedelta
 import calendar
 import time
+import threading
 from concurrent.futures import ThreadPoolExecutor
 import feedparser
 import trafilatura
@@ -16,6 +17,9 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(
 
 CONFIG_PATH = 'config.json'
 OUTPUT_PATH = 'public/data/news_today.json'
+
+# Lock di sincronizzazione per proteggere lxml/libxml2 (non e thread-safe nel C) ed evitare crash "free(): invalid pointer"
+extract_lock = threading.Lock()
 
 # Modelli candidati: gemini-3.8-flash e il modello principale raccomandato da Google
 CANDIDATE_MODELS = ['gemini-3.8-flash', 'gemini-3.6-flash']
@@ -92,7 +96,7 @@ def fetch_single_feed(url, max_items):
                 continue
             
             raw_summary = entry.get('summary', '') or entry.get('description', '')
-            clean_summary = clean_html(raw_summary)[:300]
+            clean_summary = clean_html(raw_summary)[:200]
             img = extract_image_from_entry(entry)
             
             entries_data.append({
@@ -125,7 +129,7 @@ def fetch_all_global_news(config, max_items_per_feed):
                     seen_urls.add(item['url'])
                     global_articles.append(item)
                     
-    logging.info(f"--- RACCOLTA COMPLETATA: {len(global_articles)} notizie trovate istantaneamente ---")
+    logging.info(f"--- RACCOLTA COMPLETATA: {len(global_articles)} notizie trovate ---")
     return global_articles
 
 def generate_content_resilient(client, prompt, schema=None, temperature=0.2):
@@ -168,7 +172,7 @@ def generate_master_plan(global_articles, client):
             'url': a['url'],
             'title': a['title'],
             'image': a.get('image', ''),
-            'text': a['text'][:300]
+            'text': a['text'][:150]
         }
         for a in global_articles
     ]
@@ -194,9 +198,11 @@ def scrape_single_url(url):
     try:
         downloaded = trafilatura.fetch_url(url)
         if downloaded:
-            text = trafilatura.extract(downloaded) or ""
-            metadata = trafilatura.extract_metadata(downloaded)
-            image = metadata.image if metadata else ""
+            # lxml parsing isolato con lock per totale stabilita C/libxml2
+            with extract_lock:
+                text = trafilatura.extract(downloaded) or ""
+                metadata = trafilatura.extract_metadata(downloaded)
+                image = metadata.image if metadata else ""
             return url, text[:2500], image
     except Exception as e:
         logging.warning(f"Failed to scrape {url}: {e}")
@@ -205,7 +211,7 @@ def scrape_single_url(url):
 def scrape_selected_articles(urls):
     logging.info(f"--- FASE 1.5: SCRAPING PARALLELO DI {len(urls)} ARTICOLI SCELTI ---")
     scraped_data = {}
-    with ThreadPoolExecutor(max_workers=10) as executor:
+    with ThreadPoolExecutor(max_workers=5) as executor:
         results = executor.map(scrape_single_url, urls)
         for url, text, image in results:
             scraped_data[url] = {"text": text, "image": image}
@@ -304,7 +310,7 @@ def main():
         CANDIDATE_MODELS = discovered
 
     config = load_config()
-    max_items_per_feed = config.get("settings", {}).get("max_items_per_feed", 10)
+    max_items_per_feed = config.get("settings", {}).get("max_items_per_feed", 8)
     
     global_articles = fetch_all_global_news(config, max_items_per_feed)
     
@@ -331,11 +337,11 @@ def main():
         "Scienze e Tecnologia": master_plan.Scienze_Tecnologia.items
     }
     
-    # Raccogli tutti gli URL unici scelti dal Master Plan per fare scraping solo di questi
+    # Raccogli tutti gli URL unici scelti dal Master Plan per fare scraping solo di questi (max 2 per notizia)
     all_chosen_urls = set()
     for planned_items in cat_map.values():
         for item in planned_items:
-            for url in item.sources:
+            for url in item.sources[:2]:
                 all_chosen_urls.add(url)
                 
     scraped_data = scrape_selected_articles(all_chosen_urls)

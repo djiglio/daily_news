@@ -1,4 +1,4 @@
-﻿name: Daily News Generator
+name: Daily News Generator
 
 on:
   workflow_dispatch: # Avvio manuale
@@ -8,7 +8,7 @@ on:
 jobs:
   generate:
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 10
     permissions:
       contents: write
     env:
