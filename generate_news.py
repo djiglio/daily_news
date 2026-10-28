@@ -158,7 +158,7 @@ def generate_content_resilient(client, prompt, schema=None, temperature=0.2):
                 # Imposta ThinkingLevel.LOW sui modelli Gemini 3.x per evitare 4 minuti di attesa a chiamata
                 if model_name.startswith('gemini-3'):
                     config_args["thinking_config"] = types.ThinkingConfig(
-                        thinking_level=types.ThinkingLevel.LOW
+                        thinking_level=types.ThinkingLevel.MEDIUM
                     )
                 
                 response = client.models.generate_content(
