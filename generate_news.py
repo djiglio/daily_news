@@ -1,11 +1,12 @@
 ﻿import os
+import sys
 import json
 import logging
 import re
 from datetime import datetime, timedelta
 import calendar
 import time
-from concurrent.futures import ThreadPoolExecutor
+from concurrent.futures import ThreadPoolExecutor, wait
 import requests
 import feedparser
 import trafilatura
@@ -13,13 +14,13 @@ from pydantic import BaseModel, Field
 from google import genai
 from google.genai import types
 
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s', stream=sys.stdout)
 
 CONFIG_PATH = 'config.json'
 OUTPUT_PATH = 'public/data/news_today.json'
 
-# Modelli candidati: gemini-3.8-flash e il modello principale raccomandato da Google
-CANDIDATE_MODELS = ['gemini-3.8-flash', 'gemini-3.6-flash']
+# Solo veri modelli testuali Flash (esclusi modelli TTS, Image, ecc. che causavano loop infiniti)
+CANDIDATE_MODELS = ['gemini-3.8-flash', 'gemini-3.7-flash', 'gemini-3.6-flash', 'gemini-flash-latest']
 
 HEADERS = {
     'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36'
@@ -83,7 +84,10 @@ def extract_image_from_entry(entry):
 def fetch_single_feed(url, max_items):
     entries_data = []
     try:
-        feed = feedparser.parse(url, agent=HEADERS['User-Agent'])
+        resp = requests.get(url, headers=HEADERS, timeout=(5, 10))
+        if resp.status_code != 200:
+            return entries_data
+        feed = feedparser.parse(resp.content)
         now = datetime.utcnow()
         for entry in feed.entries:
             entry_time_struct = entry.get('published_parsed') or entry.get('updated_parsed')
@@ -113,7 +117,7 @@ def fetch_single_feed(url, max_items):
     return entries_data
 
 def fetch_all_global_news(config, max_items_per_feed):
-    logging.info("--- INIZIO RACCOLTA NOTIZIE DAI FEED RSS (PARALLELA) ---")
+    logging.info("--- INIZIO RACCOLTA NOTIZIE DAI FEED RSS (PARALLELA CON TIMEOUT) ---")
     all_feed_urls = set()
     for feeds in config["categories"].values():
         for url in feeds:
@@ -122,13 +126,20 @@ def fetch_all_global_news(config, max_items_per_feed):
     global_articles = []
     seen_urls = set()
     
-    with ThreadPoolExecutor(max_workers=10) as executor:
-        futures = [executor.submit(fetch_single_feed, url, max_items_per_feed) for url in all_feed_urls]
-        for f in futures:
+    executor = ThreadPoolExecutor(max_workers=10)
+    futures = [executor.submit(fetch_single_feed, url, max_items_per_feed) for url in all_feed_urls]
+    done, not_done = wait(futures, timeout=30)
+    if not_done:
+        logging.warning(f"{len(not_done)} feed RSS troppo lenti ignorati per timeout.")
+    for f in done:
+        try:
             for item in f.result():
                 if item['url'] not in seen_urls:
                     seen_urls.add(item['url'])
                     global_articles.append(item)
+        except Exception as e:
+            logging.warning(f"Errore lettura risultato feed: {e}")
+    executor.shutdown(wait=False, cancel_futures=True)
                     
     logging.info(f"--- RACCOLTA COMPLETATA: {len(global_articles)} notizie trovate ---")
     return global_articles
@@ -136,13 +147,19 @@ def fetch_all_global_news(config, max_items_per_feed):
 def generate_content_resilient(client, prompt, schema=None, temperature=0.2):
     last_error = None
     for model_name in CANDIDATE_MODELS:
-        for attempt in range(1, 4):
+        for attempt in range(1, 3):
             try:
-                logging.info(f"Chiamata Gemini ({model_name}) - Tentativo {attempt}/3...")
+                logging.info(f"Chiamata Gemini ({model_name}) - Tentativo {attempt}/2...")
                 config_args = {"temperature": temperature}
                 if schema:
                     config_args["response_mime_type"] = "application/json"
                     config_args["response_schema"] = schema
+                
+                # Imposta ThinkingLevel.LOW sui modelli Gemini 3.x per evitare 4 minuti di attesa a chiamata
+                if model_name.startswith('gemini-3'):
+                    config_args["thinking_config"] = types.ThinkingConfig(
+                        thinking_level=types.ThinkingLevel.LOW
+                    )
                 
                 response = client.models.generate_content(
                     model=model_name,
@@ -153,13 +170,26 @@ def generate_content_resilient(client, prompt, schema=None, temperature=0.2):
             except Exception as e:
                 last_error = e
                 err_str = str(e)
-                logging.warning(f"Errore con {model_name} (Tentativo {attempt}/3): {err_str}")
+                logging.warning(f"Errore con {model_name} (Tentativo {attempt}/2): {err_str}")
                 
-                if "404" in err_str or "NOT_FOUND" in err_str or "not found" in err_str.lower():
-                    logging.info(f"Modello {model_name} non disponibile, passo al successivo.")
+                # Se il modello non supporta thinking_config, riprova subito senza thinking_config
+                if "thinking" in err_str.lower() and "thinking_config" in config_args:
+                    try:
+                        del config_args["thinking_config"]
+                        return client.models.generate_content(
+                            model=model_name,
+                            contents=prompt,
+                            config=types.GenerateContentConfig(**config_args)
+                        )
+                    except Exception as e2:
+                        last_error = e2
+                        err_str = str(e2)
+
+                if any(code in err_str for code in ["404", "NOT_FOUND", "not found", "400", "INVALID_ARGUMENT"]):
+                    logging.info(f"Modello {model_name} non compatibile o non disponibile, passo al successivo.")
                     break
                     
-                wait_time = attempt * 15
+                wait_time = attempt * 10
                 logging.info(f"Attesa di {wait_time}s prima di riprovare...")
                 time.sleep(wait_time)
                 
@@ -197,7 +227,7 @@ Archivio Notizie:
 
 def download_html(url):
     try:
-        resp = requests.get(url, headers=HEADERS, timeout=10)
+        resp = requests.get(url, headers=HEADERS, timeout=(5, 8))
         if resp.status_code == 200 and resp.text:
             return url, resp.text
     except Exception as e:
@@ -208,10 +238,20 @@ def scrape_selected_articles(urls):
     logging.info(f"--- FASE 1.5: DOWNLOAD PARALLELO E PARSING SICURO DI {len(urls)} FONTI ---")
     scraped_data = {}
     
-    # 1. Download HTTP in parallelo con requests (100% thread-safe in Python)
+    # 1. Download HTTP in parallelo con timeout globale rigido (max 45s totali)
+    executor = ThreadPoolExecutor(max_workers=8)
+    futures = {executor.submit(download_html, url): url for url in urls}
+    done, not_done = wait(futures.keys(), timeout=45)
+    if not_done:
+        logging.warning(f"{len(not_done)} pagine web troppo lente ignorate per timeout.")
+        
     downloaded_pages = []
-    with ThreadPoolExecutor(max_workers=8) as executor:
-        downloaded_pages = list(executor.map(download_html, urls))
+    for f in done:
+        try:
+            downloaded_pages.append(f.result())
+        except Exception:
+            pass
+    executor.shutdown(wait=False, cancel_futures=True)
         
     # 2. Parsing HTML con trafilatura/lxml nel main thread (evita qualsiasi crash C "free(): invalid pointer")
     for url, html in downloaded_pages:
@@ -227,7 +267,7 @@ def scrape_selected_articles(urls):
         else:
             scraped_data[url] = {"text": "", "image": ""}
             
-    logging.info("--- SCRAPING COMPLETATO IN SICUREZZA ---")
+    logging.info(f"--- SCRAPING COMPLETATO IN SICUREZZA ({len(scraped_data)} fonti elaborate) ---")
     return scraped_data
 
 def generate_category_drafts(category_name, planned_items, scraped_data, client):
@@ -289,44 +329,20 @@ Le notizie principali:
         logging.error(f"Failed to generate briefing: {e}")
         return "Buongiorno. Le notizie principali di oggi sono in fase di elaborazione. Restate con noi per i prossimi aggiornamenti."
 
-def get_candidate_models(client):
-    preferred = ['gemini-3.8-flash', 'gemini-3.6-flash']
-    try:
-        discovered = []
-        for m in client.models.list():
-            name = m.name.replace("models/", "")
-            if "flash" in name and "generateContent" in (m.supported_actions or []):
-                discovered.append(name)
-        discovered = [m for m in discovered if not m.startswith('gemini-2.')]
-        result = [m for m in preferred if m in discovered]
-        for m in discovered:
-            if m not in result:
-                result.append(m)
-        if result:
-            logging.info(f"Modelli Gemini disponibili rilevati da API: {result}")
-            return result
-    except Exception as e:
-        logging.warning(f"Impossibile elencare i modelli via API: {e}")
-    return preferred
-
 def main():
-    global CANDIDATE_MODELS
     api_key = os.environ.get("GEMINI_API_KEY")
     if not api_key:
         logging.error("GEMINI_API_KEY is not set.")
         return
         
-    client = genai.Client(api_key=api_key)
-    discovered = get_candidate_models(client)
-    if discovered:
-        CANDIDATE_MODELS = discovered
+    # Timeout HTTP rigido di 90 secondi per ogni singola chiamata a Gemini (evita blocchi infiniti)
+    client = genai.Client(api_key=api_key, http_options=types.HttpOptions(timeout=90000))
 
     config = load_config()
     max_items_per_feed = config.get("settings", {}).get("max_items_per_feed", 20)
     
     global_articles = fetch_all_global_news(config, max_items_per_feed)
     
-    import sys
     master_plan = None
     try:
         master_plan = generate_master_plan(global_articles, client)
@@ -374,10 +390,12 @@ def main():
             continue
             
         drafts_obj = generate_category_drafts(cat_name, planned_items, scraped_data, client)
-        if drafts_obj:
+        if drafts_obj and drafts_obj.drafts:
             cat_list = []
-            for plan in planned_items:
+            for idx, plan in enumerate(planned_items):
                 draft = next((d for d in drafts_obj.drafts if d.title == plan.title), None)
+                if not draft and idx < len(drafts_obj.drafts):
+                    draft = drafts_obj.drafts[idx]
                 if draft:
                     combined = {
                         "title": plan.title,
@@ -393,7 +411,7 @@ def main():
             cat_list.sort(key=lambda x: x["global_importance_score"], reverse=True)
             final_output["categories"][cat_name] = cat_list
             
-        time.sleep(3)
+        time.sleep(2)
         
     # --- FASE 3: GENERAZIONE TOP NEWS ---
     all_final_items.sort(key=lambda x: x["global_importance_score"], reverse=True)

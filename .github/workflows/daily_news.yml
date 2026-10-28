@@ -1,4 +1,4 @@
-name: Daily News Generator
+﻿name: Daily News Generator
 
 on:
   workflow_dispatch: # Avvio manuale
@@ -14,6 +14,7 @@ jobs:
     env:
       FCM_TOKEN: ${{ secrets.FCM_TOKEN }}
       FCM_SERVICE_ACCOUNT: ${{ secrets.FCM_SERVICE_ACCOUNT }}
+      PYTHONUNBUFFERED: "1"
 
     steps:
       - name: Checkout repository
@@ -33,7 +34,7 @@ jobs:
       - name: Run script
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
-        run: python generate_news.py
+        run: python -u generate_news.py
 
       - name: Commit and Push changes
         run: |
@@ -43,4 +44,4 @@ jobs:
           git diff --quiet && git diff --staged --quiet || (git commit -m "chore: Aggiornamento automatico rassegna stampa $(date +'%Y-%m-%d')" && git push)
 
       - name: Send Push Notification (FCM)
-        run: python send_fcm.py
+        run: python -u send_fcm.py
