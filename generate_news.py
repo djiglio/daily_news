@@ -145,6 +145,10 @@ def fetch_all_global_news(config, max_items_per_feed):
     return global_articles
 
 def generate_content_resilient(client, prompt, schema=None, temperature=0.2):
+    """
+    Chiama Gemini con retry e validazione Pydantic INTERNA al ciclo di retry:
+    se il JSON restituito e incompleto o malformato, riprova automaticamente.
+    """
     last_error = None
     for model_name in CANDIDATE_MODELS:
         for attempt in range(1, 4):
@@ -155,7 +159,7 @@ def generate_content_resilient(client, prompt, schema=None, temperature=0.2):
                     config_args["response_mime_type"] = "application/json"
                     config_args["response_schema"] = schema
                 
-                # Imposta ThinkingLevel.MEDIUM sui modelli Gemini 3.x
+                # Imposta ThinkingLevel.MEDIUM sui modelli Gemini 3.8
                 if model_name.startswith('gemini-3.8'):
                     config_args["thinking_config"] = types.ThinkingConfig(
                         thinking_level=types.ThinkingLevel.MEDIUM
@@ -166,6 +170,8 @@ def generate_content_resilient(client, prompt, schema=None, temperature=0.2):
                     contents=prompt,
                     config=types.GenerateContentConfig(**config_args)
                 )
+                if schema:
+                    return schema.model_validate_json(response.text)
                 return response
             except Exception as e:
                 last_error = e
@@ -175,17 +181,20 @@ def generate_content_resilient(client, prompt, schema=None, temperature=0.2):
                 if "thinking" in err_str.lower() and "thinking_config" in config_args:
                     try:
                         del config_args["thinking_config"]
-                        return client.models.generate_content(
+                        response = client.models.generate_content(
                             model=model_name,
                             contents=prompt,
                             config=types.GenerateContentConfig(**config_args)
                         )
+                        if schema:
+                            return schema.model_validate_json(response.text)
+                        return response
                     except Exception as e2:
                         last_error = e2
                         err_str = str(e2)
 
-                if any(code in err_str for code in ["404", "NOT_FOUND", "not found", "400", "INVALID_ARGUMENT"]):
-                    logging.info(f"Modello {model_name} non compatibile o non disponibile, passo al successivo.")
+                if any(code in err_str for code in ["404", "NOT_FOUND", "not found"]):
+                    logging.info(f"Modello {model_name} non disponibile, passo al successivo.")
                     break
                     
                 wait_time = attempt * 15
@@ -221,8 +230,7 @@ REGOLE TASSATIVE:
 Archivio Notizie:
 {json.dumps(lightweight_articles, ensure_ascii=False)}
 """
-    response = generate_content_resilient(client, prompt, schema=MasterPlan, temperature=0.2)
-    return MasterPlan.model_validate_json(response.text)
+    return generate_content_resilient(client, prompt, schema=MasterPlan, temperature=0.2)
 
 def download_html(url):
     try:
@@ -257,7 +265,7 @@ def scrape_selected_articles(urls):
                 text = trafilatura.extract(html) or ""
                 metadata = trafilatura.extract_metadata(html)
                 image = metadata.image if metadata else ""
-                scraped_data[url] = {"text": text[:2500], "image": image}
+                scraped_data[url] = {"text": text[:1500], "image": image}
             except Exception as e:
                 logging.warning(f"Failed to parse HTML for {url}: {e}")
                 scraped_data[url] = {"text": "", "image": ""}
@@ -298,8 +306,7 @@ Usa paragrafi separati da doppio a capo (\\n\\n) ed evidenzia in **grassetto** s
 {json.dumps(assigned_texts, ensure_ascii=False, indent=2)}
 """
     try:
-        response = generate_content_resilient(client, prompt, schema=CategoryDrafts, temperature=0.3)
-        return CategoryDrafts.model_validate_json(response.text)
+        return generate_content_resilient(client, prompt, schema=CategoryDrafts, temperature=0.3)
     except Exception as e:
         logging.error(f"Errore scrittura {category_name}: {e}")
         return None
@@ -382,14 +389,14 @@ def main():
                         
     all_final_items = []
     
-    # Esegui la scrittura delle 7 categorie in parallelo (3 alla volta) per triplicare la velocita della Fase 2
-    def draft_category_worker(item_tuple):
-        cat_name, planned_items = item_tuple
+    # Esecuzione sequenziale delle 7 categorie per evitare errori 429/TPM e conflitti sul client HTTP
+    for cat_name, planned_items in cat_map.items():
         if not planned_items:
-            return cat_name, []
+            continue
+            
         drafts_obj = generate_category_drafts(cat_name, planned_items, scraped_data, client)
-        cat_list = []
         if drafts_obj and drafts_obj.drafts:
+            cat_list = []
             for idx, plan in enumerate(planned_items):
                 draft = next((d for d in drafts_obj.drafts if d.title == plan.title), None)
                 if not draft and idx < len(drafts_obj.drafts):
@@ -404,17 +411,21 @@ def main():
                         "global_importance_score": plan.global_importance_score
                     }
                     cat_list.append(combined)
+                    all_final_items.append(combined)
+            
             cat_list.sort(key=lambda x: x["global_importance_score"], reverse=True)
-        return cat_name, cat_list
-
-    with ThreadPoolExecutor(max_workers=3) as executor:
-        results = list(executor.map(draft_category_worker, list(cat_map.items())))
-        
-    for cat_name, cat_list in results:
-        if cat_list:
             final_output["categories"][cat_name] = cat_list
-            all_final_items.extend(cat_list)
+            logging.info(f"Categoria '{cat_name}' completata con {len(cat_list)} articoli.")
+        else:
+            logging.error(f"ATTENZIONE: Categoria '{cat_name}' non generata.")
+            
+        time.sleep(8) # Pausa per azzerare il burst rate-limit TPM tra una categoria e l'altra
         
+    # Controllo di integrita: non sovrascrivere il sito se mancano categorie!
+    if len(final_output["categories"]) < 6:
+        logging.error(f"Generazione incompleta ({len(final_output['categories'])}/7 categorie). Annullo il salvataggio per non pubblicare una rassegna parziale.")
+        sys.exit(1)
+
     # --- FASE 3: GENERAZIONE TOP NEWS ---
     all_final_items.sort(key=lambda x: x["global_importance_score"], reverse=True)
     top_news = all_final_items[:7]
