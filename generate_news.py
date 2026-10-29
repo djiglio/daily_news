@@ -19,12 +19,28 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(
 CONFIG_PATH = 'config.json'
 OUTPUT_PATH = 'public/data/news_today.json'
 
-# Modelli principali verificati
-CANDIDATE_MODELS = ['gemini-3.8-flash', 'gemini-3.6-flash']
+# Catena completa dei modelli testuali Flash attivi sull'account (ordinati per priorita e affidabilita)
+CANDIDATE_MODELS = [
+    'gemini-3.8-flash',
+    'gemini-flash-latest',
+    'gemini-3.7-flash',
+    'gemini-3.5-flash',
+    'gemini-flash-lite-latest',
+    'gemini-3.6-flash'
+]
 
 HEADERS = {
     'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36'
 }
+
+def write_step_summary(text):
+    summary_path = os.environ.get("GITHUB_STEP_SUMMARY")
+    if summary_path:
+        try:
+            with open(summary_path, "a", encoding="utf-8") as f:
+                f.write(text + "\n")
+        except Exception:
+            pass
 
 # --- PYDANTIC SCHEMAS FOR PHASE 1 ---
 class PlannedItem(BaseModel):
@@ -144,23 +160,23 @@ def fetch_all_global_news(config, max_items_per_feed):
     logging.info(f"--- RACCOLTA COMPLETATA: {len(global_articles)} notizie trovate ---")
     return global_articles
 
-def generate_content_resilient(client, prompt, schema=None, temperature=0.2):
+def generate_content_resilient(client, prompt, schema=None, temperature=0.2, task_label=""):
     """
-    Chiama Gemini con retry e validazione Pydantic INTERNA al ciclo di retry:
-    se il JSON restituito e incompleto o malformato, riprova automaticamente.
+    Chiama Gemini con retry e fallback automatico sull'intera catena di modelli Flash.
+    Include la validazione Pydantic dentro il ciclo di retry.
     """
     last_error = None
     for model_name in CANDIDATE_MODELS:
-        for attempt in range(1, 4):
+        for attempt in range(1, 3):
             try:
-                logging.info(f"Chiamata Gemini ({model_name}) - Tentativo {attempt}/3...")
+                logging.info(f"[{task_label}] Chiamata Gemini ({model_name}) - Tentativo {attempt}/2...")
                 config_args = {"temperature": temperature}
                 if schema:
                     config_args["response_mime_type"] = "application/json"
                     config_args["response_schema"] = schema
                 
-                # Imposta ThinkingLevel.MEDIUM sui modelli Gemini 3.8
-                if model_name.startswith('gemini-3.8'):
+                # Al primo tentativo su gemini-3.8-flash usa ThinkingLevel.MEDIUM; al secondo prova senza per massima compatibilita
+                if model_name.startswith('gemini-3.8') and attempt == 1:
                     config_args["thinking_config"] = types.ThinkingConfig(
                         thinking_level=types.ThinkingLevel.MEDIUM
                     )
@@ -171,37 +187,26 @@ def generate_content_resilient(client, prompt, schema=None, temperature=0.2):
                     config=types.GenerateContentConfig(**config_args)
                 )
                 if schema:
-                    return schema.model_validate_json(response.text)
+                    validated = schema.model_validate_json(response.text)
+                    logging.info(f"[{task_label}] Completato con successo usando {model_name}!")
+                    return validated
+                logging.info(f"[{task_label}] Completato con successo usando {model_name}!")
                 return response
             except Exception as e:
                 last_error = e
                 err_str = str(e)
-                logging.warning(f"Errore con {model_name} (Tentativo {attempt}/3): {err_str}")
+                logging.warning(f"[{task_label}] Errore con {model_name} (Tentativo {attempt}/2): {err_str[:300]}")
                 
-                if "thinking" in err_str.lower() and "thinking_config" in config_args:
-                    try:
-                        del config_args["thinking_config"]
-                        response = client.models.generate_content(
-                            model=model_name,
-                            contents=prompt,
-                            config=types.GenerateContentConfig(**config_args)
-                        )
-                        if schema:
-                            return schema.model_validate_json(response.text)
-                        return response
-                    except Exception as e2:
-                        last_error = e2
-                        err_str = str(e2)
-
-                if any(code in err_str for code in ["404", "NOT_FOUND", "not found"]):
-                    logging.info(f"Modello {model_name} non disponibile, passo al successivo.")
+                if any(code in err_str for code in ["404", "NOT_FOUND", "not found", "400", "INVALID_ARGUMENT"]):
+                    logging.info(f"Modello {model_name} non disponibile/compatibile, passo subito al modello successivo.")
                     break
                     
-                wait_time = attempt * 15
+                wait_time = attempt * 10
                 logging.info(f"Attesa di {wait_time}s prima di riprovare...")
                 time.sleep(wait_time)
                 
-    raise Exception(f"Tutti i modelli hanno fallito. Ultimo errore: {last_error}")
+    write_step_summary(f"- ❌ **{task_label}**: Fallito su tutti i modelli. Ultimo errore: `{str(last_error)[:250]}`")
+    raise Exception(f"Tutti i modelli hanno fallito per {task_label}. Ultimo errore: {last_error}")
 
 def generate_master_plan(global_articles, client):
     logging.info("--- FASE 1: GENERAZIONE MASTER PLAN ---")
@@ -218,7 +223,7 @@ def generate_master_plan(global_articles, client):
     
     prompt = f"""
 Sei il Direttore Responsabile di una redazione giornalistica. Ti fornisco un archivio di notizie delle ultime 24 ore.
-Devi creare la "Scaletta" della giornata per le seguenti 7 categorie: Italia, Mondo, Politica, Economia, Calcio & Sport, Attualita, Scienze e Tecnologia.
+Devi creare la "Scaletta" della giornata per le seguenti 7 categorie: Italia, Mondo, Politica, Economia, Calcio & Sport, Attualità, Scienze e Tecnologia.
 
 REGOLE TASSATIVE:
 1. Scegli ESATTAMENTE 5 notizie per ogni categoria (35 notizie uniche in totale).
@@ -230,7 +235,7 @@ REGOLE TASSATIVE:
 Archivio Notizie:
 {json.dumps(lightweight_articles, ensure_ascii=False)}
 """
-    return generate_content_resilient(client, prompt, schema=MasterPlan, temperature=0.2)
+    return generate_content_resilient(client, prompt, schema=MasterPlan, temperature=0.2, task_label="Master Plan")
 
 def download_html(url):
     try:
@@ -306,7 +311,7 @@ Usa paragrafi separati da doppio a capo (\\n\\n) ed evidenzia in **grassetto** s
 {json.dumps(assigned_texts, ensure_ascii=False, indent=2)}
 """
     try:
-        return generate_content_resilient(client, prompt, schema=CategoryDrafts, temperature=0.3)
+        return generate_content_resilient(client, prompt, schema=CategoryDrafts, temperature=0.3, task_label=f"Categoria {category_name}")
     except Exception as e:
         logging.error(f"Errore scrittura {category_name}: {e}")
         return None
@@ -326,7 +331,7 @@ Le notizie principali:
 {news_list}
 """
     try:
-        response = generate_content_resilient(client, prompt, schema=None, temperature=0.4)
+        response = generate_content_resilient(client, prompt, schema=None, temperature=0.4, task_label="Briefing Audio")
         testo = response.text.replace('*', '')
         return testo.strip()
     except Exception as e:
@@ -334,22 +339,25 @@ Le notizie principali:
         return "Buongiorno. Le notizie principali di oggi sono in fase di elaborazione. Restate con noi per i prossimi aggiornamenti."
 
 def main():
+    write_step_summary("### 📰 Riepilogo Generazione Rassegna Stampa")
     api_key = os.environ.get("GEMINI_API_KEY")
     if not api_key:
         logging.error("GEMINI_API_KEY is not set.")
         return
         
-    # Timeout HTTP ampio (6 minuti per chiamata) per lasciare a Gemini il tempo di analizzare 450 notizie e scrivere 25 paragrafi per categoria
-    client = genai.Client(api_key=api_key, http_options=types.HttpOptions(timeout=360000))
+    # Timeout HTTP ampio (5 minuti per chiamata)
+    client = genai.Client(api_key=api_key, http_options=types.HttpOptions(timeout=300000))
 
     config = load_config()
     max_items_per_feed = config.get("settings", {}).get("max_items_per_feed", 20)
     
     global_articles = fetch_all_global_news(config, max_items_per_feed)
+    write_step_summary(f"- ✅ **Feed RSS raccolti**: {len(global_articles)} articoli")
     
     master_plan = None
     try:
         master_plan = generate_master_plan(global_articles, client)
+        write_step_summary("- ✅ **Master Plan (Fase 1)**: Scaletta generata con successo")
     except Exception as e:
         logging.error(f"Failed to generate Master Plan: {e}")
         sys.exit(1)
@@ -377,6 +385,7 @@ def main():
                 all_chosen_urls.add(url)
                 
     scraped_data = scrape_selected_articles(all_chosen_urls)
+    write_step_summary(f"- ✅ **Scraping Fonti (Fase 1.5)**: {len(scraped_data)} fonti elaborate")
     
     # Backfill delle immagini se il Master Plan non ne aveva trovata una
     for planned_items in cat_map.values():
@@ -389,7 +398,7 @@ def main():
                         
     all_final_items = []
     
-    # Esecuzione sequenziale delle 7 categorie per evitare errori 429/TPM e conflitti sul client HTTP
+    # Esecuzione sequenziale delle 7 categorie con fallback multi-modello
     for cat_name, planned_items in cat_map.items():
         if not planned_items:
             continue
@@ -416,10 +425,11 @@ def main():
             cat_list.sort(key=lambda x: x["global_importance_score"], reverse=True)
             final_output["categories"][cat_name] = cat_list
             logging.info(f"Categoria '{cat_name}' completata con {len(cat_list)} articoli.")
+            write_step_summary(f"- ✅ **{cat_name}**: {len(cat_list)} approfondimenti scritti")
         else:
             logging.error(f"ATTENZIONE: Categoria '{cat_name}' non generata.")
             
-        time.sleep(8) # Pausa per azzerare il burst rate-limit TPM tra una categoria e l'altra
+        time.sleep(15) # Pausa di 15s per far ricaricare la finestra TPM tra una categoria e l'altra
         
     # Controllo di integrita: non sovrascrivere il sito se mancano categorie!
     if len(final_output["categories"]) < 6:
@@ -437,6 +447,7 @@ def main():
     # Genera il briefing
     briefing_text = generate_briefing(top_news, client)
     final_output["briefing_text"] = briefing_text
+    write_step_summary("- ✅ **Briefing Podcast**: Generato con successo")
             
     os.makedirs(os.path.dirname(OUTPUT_PATH), exist_ok=True)
     with open(OUTPUT_PATH, 'w', encoding='utf-8') as f:
