@@ -19,8 +19,8 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(
 CONFIG_PATH = 'config.json'
 OUTPUT_PATH = 'public/data/news_today.json'
 
-# Solo veri modelli testuali Flash (esclusi modelli TTS, Image, ecc. che causavano loop infiniti)
-CANDIDATE_MODELS = ['gemini-3.8-flash', 'gemini-3.7-flash', 'gemini-3.6-flash', 'gemini-flash-latest']
+# Modelli principali verificati
+CANDIDATE_MODELS = ['gemini-3.8-flash', 'gemini-3.6-flash']
 
 HEADERS = {
     'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36'
@@ -147,16 +147,16 @@ def fetch_all_global_news(config, max_items_per_feed):
 def generate_content_resilient(client, prompt, schema=None, temperature=0.2):
     last_error = None
     for model_name in CANDIDATE_MODELS:
-        for attempt in range(1, 3):
+        for attempt in range(1, 4):
             try:
-                logging.info(f"Chiamata Gemini ({model_name}) - Tentativo {attempt}/2...")
+                logging.info(f"Chiamata Gemini ({model_name}) - Tentativo {attempt}/3...")
                 config_args = {"temperature": temperature}
                 if schema:
                     config_args["response_mime_type"] = "application/json"
                     config_args["response_schema"] = schema
                 
-                # Imposta ThinkingLevel.LOW sui modelli Gemini 3.x per evitare 4 minuti di attesa a chiamata
-                if model_name.startswith('gemini-3'):
+                # Imposta ThinkingLevel.MEDIUM sui modelli Gemini 3.x
+                if model_name.startswith('gemini-3.8'):
                     config_args["thinking_config"] = types.ThinkingConfig(
                         thinking_level=types.ThinkingLevel.MEDIUM
                     )
@@ -170,9 +170,8 @@ def generate_content_resilient(client, prompt, schema=None, temperature=0.2):
             except Exception as e:
                 last_error = e
                 err_str = str(e)
-                logging.warning(f"Errore con {model_name} (Tentativo {attempt}/2): {err_str}")
+                logging.warning(f"Errore con {model_name} (Tentativo {attempt}/3): {err_str}")
                 
-                # Se il modello non supporta thinking_config, riprova subito senza thinking_config
                 if "thinking" in err_str.lower() and "thinking_config" in config_args:
                     try:
                         del config_args["thinking_config"]
@@ -189,7 +188,7 @@ def generate_content_resilient(client, prompt, schema=None, temperature=0.2):
                     logging.info(f"Modello {model_name} non compatibile o non disponibile, passo al successivo.")
                     break
                     
-                wait_time = attempt * 10
+                wait_time = attempt * 15
                 logging.info(f"Attesa di {wait_time}s prima di riprovare...")
                 time.sleep(wait_time)
                 
@@ -238,7 +237,6 @@ def scrape_selected_articles(urls):
     logging.info(f"--- FASE 1.5: DOWNLOAD PARALLELO E PARSING SICURO DI {len(urls)} FONTI ---")
     scraped_data = {}
     
-    # 1. Download HTTP in parallelo con timeout globale rigido (max 45s totali)
     executor = ThreadPoolExecutor(max_workers=8)
     futures = {executor.submit(download_html, url): url for url in urls}
     done, not_done = wait(futures.keys(), timeout=45)
@@ -253,7 +251,6 @@ def scrape_selected_articles(urls):
             pass
     executor.shutdown(wait=False, cancel_futures=True)
         
-    # 2. Parsing HTML con trafilatura/lxml nel main thread (evita qualsiasi crash C "free(): invalid pointer")
     for url, html in downloaded_pages:
         if html:
             try:
@@ -335,8 +332,8 @@ def main():
         logging.error("GEMINI_API_KEY is not set.")
         return
         
-    # Timeout HTTP rigido di 90 secondi per ogni singola chiamata a Gemini (evita blocchi infiniti)
-    client = genai.Client(api_key=api_key, http_options=types.HttpOptions(timeout=90000))
+    # Timeout HTTP ampio (6 minuti per chiamata) per lasciare a Gemini il tempo di analizzare 450 notizie e scrivere 25 paragrafi per categoria
+    client = genai.Client(api_key=api_key, http_options=types.HttpOptions(timeout=360000))
 
     config = load_config()
     max_items_per_feed = config.get("settings", {}).get("max_items_per_feed", 20)
@@ -385,13 +382,14 @@ def main():
                         
     all_final_items = []
     
-    for cat_name, planned_items in cat_map.items():
+    # Esegui la scrittura delle 7 categorie in parallelo (3 alla volta) per triplicare la velocita della Fase 2
+    def draft_category_worker(item_tuple):
+        cat_name, planned_items = item_tuple
         if not planned_items:
-            continue
-            
+            return cat_name, []
         drafts_obj = generate_category_drafts(cat_name, planned_items, scraped_data, client)
+        cat_list = []
         if drafts_obj and drafts_obj.drafts:
-            cat_list = []
             for idx, plan in enumerate(planned_items):
                 draft = next((d for d in drafts_obj.drafts if d.title == plan.title), None)
                 if not draft and idx < len(drafts_obj.drafts):
@@ -406,12 +404,16 @@ def main():
                         "global_importance_score": plan.global_importance_score
                     }
                     cat_list.append(combined)
-                    all_final_items.append(combined)
-            
             cat_list.sort(key=lambda x: x["global_importance_score"], reverse=True)
+        return cat_name, cat_list
+
+    with ThreadPoolExecutor(max_workers=3) as executor:
+        results = list(executor.map(draft_category_worker, list(cat_map.items())))
+        
+    for cat_name, cat_list in results:
+        if cat_list:
             final_output["categories"][cat_name] = cat_list
-            
-        time.sleep(2)
+            all_final_items.extend(cat_list)
         
     # --- FASE 3: GENERAZIONE TOP NEWS ---
     all_final_items.sort(key=lambda x: x["global_importance_score"], reverse=True)
