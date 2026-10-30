@@ -1,41 +1,55 @@
-﻿importScripts('https://www.gstatic.com/firebasejs/10.9.0/firebase-app-compat.js');
-importScripts('https://www.gstatic.com/firebasejs/10.9.0/firebase-messaging-compat.js');
+const APP_URL = 'https://daily-news-8wu.pages.dev/';
 
-firebase.initializeApp({
-  apiKey: "AIzaSyD6eFyVEbQueT_MudaEO0B_4RK_pm091rQ",
-  authDomain: "dailynews-c9a32.firebaseapp.com",
-  projectId: "dailynews-c9a32",
-  storageBucket: "dailynews-c9a32.firebasestorage.app",
-  messagingSenderId: "903970367164",
-  appId: "1:903970367164:web:280515f9c320c9d37312b9"
+self.addEventListener('install', event => {
+  self.skipWaiting();
 });
 
-const messaging = firebase.messaging();
+self.addEventListener('activate', event => {
+  event.waitUntil(self.clients.claim());
+});
 
-// Gestore messaggi in background:
-// Se il payload inviato dal server contiene già l'oggetto "notification",
-// il browser e iOS APNs mostrano già la notifica in modo automatico.
-// Non dobbiamo chiamare self.registration.showNotification(), altrimenti lo smartphone mostrerà 2 notifiche duplicate!
-messaging.onBackgroundMessage(function(payload) {
-  console.log('Received background message: ', payload);
-  if (!payload.notification && payload.data) {
-    const notificationTitle = payload.data.title || 'Il tuo Daily News';
-    const notificationOptions = {
-      body: payload.data.body || 'La rassegna stampa è pronta! Tocca qui per scoprire le notizie fondamentali di oggi.',
-      icon: '/icon.jpg',
-      data: { url: payload.data.url || 'https://djiglio.github.io/daily_news/' }
-    };
-    self.registration.showNotification(notificationTitle, notificationOptions);
+self.addEventListener('push', function(event) {
+  let payload = {};
+  if (event.data) {
+    try {
+      payload = event.data.json();
+    } catch (e) {
+      payload = {};
+    }
   }
+
+  const notification = payload.notification || {};
+  const data = payload.data || {};
+  const fcmOptions = payload.fcmOptions || payload.fcm_options || {};
+
+  const title = notification.title || data.title || 'Il tuo Daily News';
+  const body = notification.body || data.body || 'La rassegna stampa è pronta! Tocca qui per scoprire le notizie fondamentali di oggi.';
+  const targetUrl = fcmOptions.link || data.url || APP_URL;
+
+  const options = {
+    body: body,
+    icon: '/icon.jpg',
+    badge: '/icon.jpg',
+    tag: 'daily-news-push',
+    renotify: false,
+    data: { url: targetUrl }
+  };
+
+  event.waitUntil(
+    self.registration.showNotification(title, options)
+  );
 });
 
 self.addEventListener('notificationclick', function(event) {
   event.notification.close();
-  const targetUrl = (event.notification.data && event.notification.data.url) ? event.notification.data.url : 'https://djiglio.github.io/daily_news/';
+  const targetUrl = (event.notification.data && event.notification.data.url && !event.notification.data.url.includes('djiglio.github.io'))
+    ? event.notification.data.url
+    : (self.location.origin + '/');
+
   event.waitUntil(
     clients.matchAll({ type: 'window', includeUncontrolled: true }).then(windowClients => {
       for (let client of windowClients) {
-        if (client.url.includes('daily_news') && 'focus' in client) {
+        if (client.url.startsWith(self.location.origin) && 'focus' in client) {
           return client.focus();
         }
       }

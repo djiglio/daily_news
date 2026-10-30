@@ -38,11 +38,14 @@ def send_push():
             "token": token,
             "notification": {
                 "title": "Il tuo Daily News",
-                "body": "La rassegna stampa e' pronta! Tocca qui per scoprire le notizie fondamentali di oggi."
+                "body": "La rassegna stampa è pronta! Tocca qui per scoprire le notizie fondamentali di oggi."
+            },
+            "data": {
+                "url": "https://daily-news-8wu.pages.dev/"
             },
             "webpush": {
                 "fcm_options": {
-                    "link": "https://djiglio.github.io/daily_news/"
+                    "link": "https://daily-news-8wu.pages.dev/"
                 }
             }
         }
