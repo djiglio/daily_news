@@ -1,4 +1,4 @@
-﻿name: Daily News Generator
+name: Daily News Generator
 
 on:
   workflow_dispatch: # Avvio manuale
@@ -34,7 +34,27 @@ jobs:
       - name: Run script
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
-        run: python -u generate_news.py
+        run: |
+          python -u generate_news.py 2>&1 | tee generator.log
+
+      - name: Diagnostic Output on Failure
+        if: failure()
+        run: |
+          echo "### ❌ Output Completo dell'Errore" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          tail -n 120 generator.log >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+
+      - name: Capture Error Log on Failure
+        if: failure()
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          mkdir -p logs
+          cp generator.log logs/error.log
+          git add logs/error.log
+          git commit -m "ci: log failure details [skip ci]" || true
+          git push || true
 
       - name: Commit and Push changes
         run: |

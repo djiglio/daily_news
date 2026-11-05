@@ -19,11 +19,12 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(
 CONFIG_PATH = 'config.json'
 OUTPUT_PATH = 'public/data/news_today.json'
 
-# Modelli Flash realmente supportati e attivi
+# Modelli Flash supportati e attivi
 CANDIDATE_MODELS = [
     'gemini-3.8-flash',
-    'gemini-3.6-flash',
-    'gemini-flash-latest'
+    'gemini-flash-latest',
+    'gemini-2.5-flash',
+    'gemini-2.0-flash'
 ]
 
 HEADERS = {
@@ -77,22 +78,44 @@ def clean_html(raw_html):
     clean = re.sub(r'<[^>]+>', ' ', raw_html)
     return ' '.join(clean.split())
 
+def upgrade_image_resolution(url):
+    if not url:
+        return ""
+    # BBC: sostituisce miniature 240/135 con versione HD 1200
+    url = re.sub(r'/standard/\d+/', '/branded_news/1200/', url)
+    # WordPress: rimuove suffisso dimensioni -150x150, -300x200 per ottenere l'immagine originale piena
+    url = re.sub(r'-\d+x\d+(\.[a-zA-Z]{3,4})$', r'\1', url)
+    # Parametri query di ridimensionamento CDN (=w100-h100, =s150, ecc.)
+    url = re.sub(r'=w\d+(-h\d+)?(-[a-z]+)?$', '=w1200', url)
+    url = re.sub(r'=s\d+(-[a-z]+)?$', '=s1200', url)
+    # Miniature Gazzetta / Sky / Corriere
+    url = re.sub(r'_(thumb|small|150x\d+)\.', '_800x450.', url)
+    return url
+
 def extract_image_from_entry(entry):
+    img = ""
+    # 1. Media content ad alta risoluzione
     if 'media_content' in entry:
         for media in entry['media_content']:
             if media.get('url'):
-                return media['url']
-    if 'media_thumbnail' in entry and len(entry['media_thumbnail']) > 0:
-        return entry['media_thumbnail'][0].get('url', '')
-    if 'enclosures' in entry:
+                img = media['url']
+                break
+    # 2. Enclosures (allegati multimediali feed)
+    if not img and 'enclosures' in entry:
         for enc in entry['enclosures']:
             if 'image' in enc.get('type', '') or enc.get('href', '').endswith(('.jpg', '.jpeg', '.png', '.webp')):
-                return enc.get('href') or enc.get('url', '')
-    if 'links' in entry:
+                img = enc.get('href') or enc.get('url', '')
+                break
+    # 3. Links specifici con tipo image
+    if not img and 'links' in entry:
         for link in entry['links']:
             if 'image' in link.get('type', ''):
-                return link.get('href', '')
-    return ""
+                img = link.get('href', '')
+                break
+    # 4. Ultima risorsa: media_thumbnail (spesso a bassa risoluzione)
+    if not img and 'media_thumbnail' in entry and len(entry['media_thumbnail']) > 0:
+        img = entry['media_thumbnail'][0].get('url', '')
+    return upgrade_image_resolution(img)
 
 def fetch_single_feed(url, max_items):
     entries_data = []
@@ -226,6 +249,10 @@ def generate_master_plan(global_articles, client):
         }
         for a in global_articles
     ]
+    
+    # Seleziona fino a 140 articoli per mantenere il prompt compatto e velocissimo senza eccedere i limiti token
+    if len(lightweight_articles) > 140:
+        lightweight_articles = lightweight_articles[:140]
     
     prompt = f"""
 Sei il Direttore Responsabile di una redazione giornalistica. Ti fornisco un archivio di notizie delle ultime 24 ore.
@@ -393,14 +420,18 @@ def main():
     scraped_data = scrape_selected_articles(all_chosen_urls)
     write_step_summary(f"- ✅ **Scraping Fonti (Fase 1.5)**: {len(scraped_data)} fonti elaborate")
     
-    # Backfill delle immagini se il Master Plan non ne aveva trovata una
+    # Prioritizza SEMPRE l'immagine ad alta risoluzione (og:image) estratta dalla pagina dell'articolo per evitare foto sfocate
     for planned_items in cat_map.values():
         for item in planned_items:
-            if not item.image_url:
-                for url in item.sources:
-                    if url in scraped_data and scraped_data[url]["image"]:
-                        item.image_url = scraped_data[url]["image"]
-                        break
+            hd_image = None
+            for url in item.sources:
+                if url in scraped_data and scraped_data[url]["image"]:
+                    hd_image = scraped_data[url]["image"]
+                    break
+            if hd_image:
+                item.image_url = upgrade_image_resolution(hd_image)
+            elif item.image_url:
+                item.image_url = upgrade_image_resolution(item.image_url)
                         
     all_final_items = []
     
