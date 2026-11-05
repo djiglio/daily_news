@@ -1,4 +1,4 @@
-﻿import os
+import os
 import sys
 import json
 import logging
@@ -160,7 +160,7 @@ def fetch_all_global_news(config, max_items_per_feed):
     logging.info(f"--- RACCOLTA COMPLETATA: {len(global_articles)} notizie trovate ---")
     return global_articles
 
-def generate_content_resilient(client, prompt, schema=None, temperature=0.2, task_label=""):
+def generate_content_resilient(client, prompt, schema=None, temperature=0.2, task_label="", thinking_level=None):
     """
     Chiama Gemini con retry e fallback automatico sull'intera catena di modelli Flash.
     Include la validazione Pydantic dentro il ciclo di retry.
@@ -175,10 +175,10 @@ def generate_content_resilient(client, prompt, schema=None, temperature=0.2, tas
                     config_args["response_mime_type"] = "application/json"
                     config_args["response_schema"] = schema
                 
-                # Al primo tentativo su gemini-3.8-flash usa ThinkingLevel.MEDIUM; al secondo prova senza per massima compatibilita
-                if model_name.startswith('gemini-3.8') and attempt == 1:
+                # Se richiesto thinking_level, lo attiva su gemini-3.8 al tentativo 1; al tentativo 2 fallback standard
+                if thinking_level and model_name.startswith('gemini-3.8') and attempt == 1:
                     config_args["thinking_config"] = types.ThinkingConfig(
-                        thinking_level=types.ThinkingLevel.MEDIUM
+                        thinking_level=thinking_level
                     )
                 
                 response = client.models.generate_content(
@@ -235,7 +235,7 @@ REGOLE TASSATIVE:
 Archivio Notizie:
 {json.dumps(lightweight_articles, ensure_ascii=False)}
 """
-    return generate_content_resilient(client, prompt, schema=MasterPlan, temperature=0.2, task_label="Master Plan")
+    return generate_content_resilient(client, prompt, schema=MasterPlan, temperature=0.2, task_label="Master Plan", thinking_level=types.ThinkingLevel.LOW)
 
 def download_html(url):
     try:
@@ -311,7 +311,7 @@ Usa paragrafi separati da doppio a capo (\\n\\n) ed evidenzia in **grassetto** s
 {json.dumps(assigned_texts, ensure_ascii=False, indent=2)}
 """
     try:
-        return generate_content_resilient(client, prompt, schema=CategoryDrafts, temperature=0.3, task_label=f"Categoria {category_name}")
+        return generate_content_resilient(client, prompt, schema=CategoryDrafts, temperature=0.3, task_label=f"Categoria {category_name}", thinking_level=types.ThinkingLevel.MEDIUM)
     except Exception as e:
         logging.error(f"Errore scrittura {category_name}: {e}")
         return None
@@ -331,7 +331,7 @@ Le notizie principali:
 {news_list}
 """
     try:
-        response = generate_content_resilient(client, prompt, schema=None, temperature=0.4, task_label="Briefing Audio")
+        response = generate_content_resilient(client, prompt, schema=None, temperature=0.4, task_label="Briefing Audio", thinking_level=None)
         testo = response.text.replace('*', '')
         return testo.strip()
     except Exception as e:
@@ -345,8 +345,8 @@ def main():
         logging.error("GEMINI_API_KEY is not set.")
         return
         
-    # Timeout HTTP ampio (5 minuti per chiamata)
-    client = genai.Client(api_key=api_key, http_options=types.HttpOptions(timeout=300000))
+    # Timeout HTTP di 3 minuti per chiamata (180s)
+    client = genai.Client(api_key=api_key, http_options=types.HttpOptions(timeout=180000))
 
     config = load_config()
     max_items_per_feed = config.get("settings", {}).get("max_items_per_feed", 20)
