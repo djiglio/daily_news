@@ -35,6 +35,7 @@ jobs:
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
         run: |
+          set -o pipefail
           python -u generate_news.py 2>&1 | tee generator.log || {
             EXIT_CODE=$?
             echo "::warning::Primo tentativo fallito (exit code: $EXIT_CODE). Attesa di 1 ora prima del rilancio automatico..."

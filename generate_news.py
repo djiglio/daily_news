@@ -19,13 +19,18 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(
 CONFIG_PATH = 'config.json'
 OUTPUT_PATH = 'public/data/news_today.json'
 
-# Modelli Flash supportati e attivi
+# Catena di modelli Gemini 3.x attivi (ciascuno con quota separata di 20 RPD sul Free Tier)
 CANDIDATE_MODELS = [
     'gemini-3.8-flash',
     'gemini-flash-latest',
-    'gemini-2.5-flash',
-    'gemini-2.0-flash'
+    'gemini-3.7-flash',
+    'gemini-3.6-flash',
+    'gemini-3.5-flash',
+    'gemini-flash-lite-latest'
 ]
+
+# Modelli che hanno esaurito la quota giornaliera o non sono disponibili durante l'esecuzione corrente
+EXHAUSTED_MODELS = set()
 
 HEADERS = {
     'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36'
@@ -187,6 +192,8 @@ def generate_content_resilient(client, prompt, schema=None, temperature=0.2, tas
     """
     last_error = None
     for model_name in CANDIDATE_MODELS:
+        if model_name in EXHAUSTED_MODELS:
+            continue
         for attempt in range(1, 3):
             try:
                 logging.info(f"[{task_label}] Chiamata Gemini ({model_name}) - Tentativo {attempt}/2...")
@@ -195,8 +202,8 @@ def generate_content_resilient(client, prompt, schema=None, temperature=0.2, tas
                     config_args["response_mime_type"] = "application/json"
                     config_args["response_schema"] = schema
                 
-                # Se richiesto thinking_level, lo attiva su gemini-3.8 al tentativo 1; al tentativo 2 fallback standard
-                if thinking_level and model_name.startswith('gemini-3.8') and attempt == 1:
+                # Se richiesto thinking_level, lo attiva sui modelli gemini-3.x al tentativo 1; al tentativo 2 fallback standard
+                if thinking_level and model_name.startswith('gemini-3') and attempt == 1:
                     config_args["thinking_config"] = types.ThinkingConfig(
                         thinking_level=thinking_level
                     )
@@ -228,6 +235,12 @@ def generate_content_resilient(client, prompt, schema=None, temperature=0.2, tas
                 
                 if any(code in err_str for code in ["404", "NOT_FOUND", "not found", "400", "INVALID_ARGUMENT"]):
                     logging.info(f"Modello {model_name} non disponibile/compatibile, passo subito al modello successivo.")
+                    EXHAUSTED_MODELS.add(model_name)
+                    break
+
+                if ("429" in err_str or "RESOURCE_EXHAUSTED" in err_str) and ("PerDay" in err_str or "free_tier_requests" in err_str):
+                    logging.info(f"Quota giornaliera (20 RPD) esaurita per {model_name}, passo immediatamente al modello successivo.")
+                    EXHAUSTED_MODELS.add(model_name)
                     break
                     
                 wait_time = attempt * 10
