@@ -19,14 +19,11 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(
 CONFIG_PATH = 'config.json'
 OUTPUT_PATH = 'public/data/news_today.json'
 
-# Catena completa dei modelli testuali Flash attivi sull'account (ordinati per priorita e affidabilita)
+# Modelli Flash realmente supportati e attivi
 CANDIDATE_MODELS = [
     'gemini-3.8-flash',
-    'gemini-flash-latest',
-    'gemini-3.7-flash',
-    'gemini-3.5-flash',
-    'gemini-flash-lite-latest',
-    'gemini-3.6-flash'
+    'gemini-3.6-flash',
+    'gemini-flash-latest'
 ]
 
 HEADERS = {
@@ -187,7 +184,16 @@ def generate_content_resilient(client, prompt, schema=None, temperature=0.2, tas
                     config=types.GenerateContentConfig(**config_args)
                 )
                 if schema:
-                    validated = schema.model_validate_json(response.text)
+                    raw_text = response.text or ""
+                    clean_text = raw_text.strip()
+                    if clean_text.startswith("```json"):
+                        clean_text = clean_text[7:]
+                    elif clean_text.startswith("```"):
+                        clean_text = clean_text[3:]
+                    if clean_text.endswith("```"):
+                        clean_text = clean_text[:-3]
+                    clean_text = clean_text.strip()
+                    validated = schema.model_validate_json(clean_text)
                     logging.info(f"[{task_label}] Completato con successo usando {model_name}!")
                     return validated
                 logging.info(f"[{task_label}] Completato con successo usando {model_name}!")
@@ -311,7 +317,7 @@ Usa paragrafi separati da doppio a capo (\\n\\n) ed evidenzia in **grassetto** s
 {json.dumps(assigned_texts, ensure_ascii=False, indent=2)}
 """
     try:
-        return generate_content_resilient(client, prompt, schema=CategoryDrafts, temperature=0.3, task_label=f"Categoria {category_name}", thinking_level=types.ThinkingLevel.MEDIUM)
+        return generate_content_resilient(client, prompt, schema=CategoryDrafts, temperature=0.3, task_label=f"Categoria {category_name}", thinking_level=types.ThinkingLevel.LOW)
     except Exception as e:
         logging.error(f"Errore scrittura {category_name}: {e}")
         return None
@@ -428,12 +434,16 @@ def main():
             write_step_summary(f"- ✅ **{cat_name}**: {len(cat_list)} approfondimenti scritti")
         else:
             logging.error(f"ATTENZIONE: Categoria '{cat_name}' non generata.")
+            write_step_summary(f"- ⚠️ **{cat_name}**: Fallita o incompleta")
             
-        time.sleep(15) # Pausa di 15s per far ricaricare la finestra TPM tra una categoria e l'altra
+        time.sleep(8) # Pausa di 8s per far ricaricare la finestra TPM tra una categoria e l'altra
         
     # Controllo di integrita: non sovrascrivere il sito se mancano categorie!
     if len(final_output["categories"]) < 6:
-        logging.error(f"Generazione incompleta ({len(final_output['categories'])}/7 categorie). Annullo il salvataggio per non pubblicare una rassegna parziale.")
+        missing = [c for c in cat_map.keys() if c not in final_output["categories"]]
+        err_msg = f"Generazione incompleta ({len(final_output['categories'])}/7 categorie salvate). Mancanti: {missing}."
+        logging.error(err_msg)
+        write_step_summary(f"\n### ❌ Job interrotto: {err_msg}")
         sys.exit(1)
 
     # --- FASE 3: GENERAZIONE TOP NEWS ---
