@@ -250,10 +250,6 @@ def generate_master_plan(global_articles, client):
         for a in global_articles
     ]
     
-    # Seleziona fino a 140 articoli per mantenere il prompt compatto e velocissimo senza eccedere i limiti token
-    if len(lightweight_articles) > 140:
-        lightweight_articles = lightweight_articles[:140]
-    
     prompt = f"""
 Sei il Direttore Responsabile di una redazione giornalistica. Ti fornisco un archivio di notizie delle ultime 24 ore.
 Devi creare la "Scaletta" della giornata per le seguenti 7 categorie: Italia, Mondo, Politica, Economia, Calcio & Sport, Attualità, Scienze e Tecnologia.
@@ -378,8 +374,8 @@ def main():
         logging.error("GEMINI_API_KEY is not set.")
         return
         
-    # Timeout HTTP di 3 minuti per chiamata (180s)
-    client = genai.Client(api_key=api_key, http_options=types.HttpOptions(timeout=180000))
+    # Timeout HTTP di 5 minuti per chiamata (300s)
+    client = genai.Client(api_key=api_key, http_options=types.HttpOptions(timeout=300000))
 
     config = load_config()
     max_items_per_feed = config.get("settings", {}).get("max_items_per_feed", 20)
@@ -467,7 +463,7 @@ def main():
             logging.error(f"ATTENZIONE: Categoria '{cat_name}' non generata.")
             write_step_summary(f"- ⚠️ **{cat_name}**: Fallita o incompleta")
             
-        time.sleep(8) # Pausa di 8s per far ricaricare la finestra TPM tra una categoria e l'altra
+        time.sleep(12) # Pausa di 12s per far ricaricare la finestra TPM tra una categoria e l'altra
         
     # Controllo di integrita: non sovrascrivere il sito se mancano categorie!
     if len(final_output["categories"]) < 6:
