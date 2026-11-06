@@ -1,39 +1,34 @@
-2026-11-05 20:16:38,356 - INFO - --- INIZIO RACCOLTA NOTIZIE DAI FEED RSS (PARALLELA CON TIMEOUT) ---
-2026-11-05 20:16:40,792 - INFO - --- RACCOLTA COMPLETATA: 449 notizie trovate ---
-2026-11-05 20:16:40,792 - INFO - --- FASE 1: GENERAZIONE MASTER PLAN ---
-2026-11-05 20:16:40,795 - INFO - [Master Plan] Chiamata Gemini (gemini-3.8-flash) - Tentativo 1/2...
-2026-11-05 20:16:40,808 - INFO - AFC is enabled with max remote calls: 10.
-2026-11-05 20:16:41,030 - INFO - HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent "HTTP/1.1 429 Too Many Requests"
-2026-11-05 20:16:41,031 - WARNING - [Master Plan] Errore con gemini-3.8-flash (Tentativo 1/2): 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. 
-2026-11-05 20:16:41,031 - INFO - Quota giornaliera (20 RPD) esaurita per gemini-3.8-flash, passo immediatamente al modello successivo.
-2026-11-05 20:16:41,031 - INFO - [Master Plan] Chiamata Gemini (gemini-flash-latest) - Tentativo 1/2...
-2026-11-05 20:16:41,031 - INFO - AFC is enabled with max remote calls: 10.
-2026-11-05 20:16:41,200 - INFO - HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent "HTTP/1.1 429 Too Many Requests"
-2026-11-05 20:16:41,201 - WARNING - [Master Plan] Errore con gemini-flash-latest (Tentativo 1/2): 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. 
-2026-11-05 20:16:41,201 - INFO - Quota giornaliera (20 RPD) esaurita per gemini-flash-latest, passo immediatamente al modello successivo.
-2026-11-05 20:16:41,201 - INFO - [Master Plan] Chiamata Gemini (gemini-3.7-flash) - Tentativo 1/2...
-2026-11-05 20:16:41,201 - INFO - AFC is enabled with max remote calls: 10.
-2026-11-05 20:16:41,367 - INFO - HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.7-flash:generateContent "HTTP/1.1 429 Too Many Requests"
-2026-11-05 20:16:41,367 - WARNING - [Master Plan] Errore con gemini-3.7-flash (Tentativo 1/2): 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. 
-2026-11-05 20:16:41,368 - INFO - Quota giornaliera (20 RPD) esaurita per gemini-3.7-flash, passo immediatamente al modello successivo.
-2026-11-05 20:16:41,368 - INFO - [Master Plan] Chiamata Gemini (gemini-3.6-flash) - Tentativo 1/2...
-2026-11-05 20:16:41,368 - INFO - AFC is enabled with max remote calls: 10.
-2026-11-05 20:16:41,524 - INFO - HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent "HTTP/1.1 429 Too Many Requests"
-2026-11-05 20:16:41,525 - WARNING - [Master Plan] Errore con gemini-3.6-flash (Tentativo 1/2): 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. 
-2026-11-05 20:16:41,525 - INFO - Quota giornaliera (20 RPD) esaurita per gemini-3.6-flash, passo immediatamente al modello successivo.
-2026-11-05 20:16:41,525 - INFO - [Master Plan] Chiamata Gemini (gemini-3.5-flash) - Tentativo 1/2...
-2026-11-05 20:16:41,525 - INFO - AFC is enabled with max remote calls: 10.
-2026-11-05 20:16:41,671 - INFO - HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash:generateContent "HTTP/1.1 429 Too Many Requests"
-2026-11-05 20:16:41,672 - WARNING - [Master Plan] Errore con gemini-3.5-flash (Tentativo 1/2): 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. 
-2026-11-05 20:16:41,672 - INFO - Quota giornaliera (20 RPD) esaurita per gemini-3.5-flash, passo immediatamente al modello successivo.
-2026-11-05 20:16:41,672 - INFO - [Master Plan] Chiamata Gemini (gemini-flash-lite-latest) - Tentativo 1/2...
-2026-11-05 20:16:41,673 - INFO - AFC is enabled with max remote calls: 10.
-2026-11-05 20:16:58,832 - INFO - HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-lite-latest:generateContent "HTTP/1.1 503 Service Unavailable"
-2026-11-05 20:16:58,832 - WARNING - [Master Plan] Errore con gemini-flash-lite-latest (Tentativo 1/2): 503 UNAVAILABLE. {'error': {'code': 503, 'message': 'This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.', 'status': 'UNAVAILABLE'}}
-2026-11-05 20:16:58,832 - INFO - Attesa di 10s prima di riprovare...
-2026-11-05 20:17:08,832 - INFO - [Master Plan] Chiamata Gemini (gemini-flash-lite-latest) - Tentativo 2/2...
-2026-11-05 20:17:08,833 - INFO - AFC is enabled with max remote calls: 10.
-2026-11-05 20:17:15,096 - INFO - HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-lite-latest:generateContent "HTTP/1.1 503 Service Unavailable"
-2026-11-05 20:17:15,097 - WARNING - [Master Plan] Errore con gemini-flash-lite-latest (Tentativo 2/2): 503 UNAVAILABLE. {'error': {'code': 503, 'message': 'This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.', 'status': 'UNAVAILABLE'}}
-2026-11-05 20:17:15,097 - INFO - Attesa di 20s prima di riprovare...
-2026-11-05 20:17:35,097 - ERROR - Failed to generate Master Plan: Tutti i modelli hanno fallito per Master Plan. Ultimo errore: 503 UNAVAILABLE. {'error': {'code': 503, 'message': 'This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.', 'status': 'UNAVAILABLE'}}
+2026-11-06 20:04:15,416 - INFO - --- INIZIO RACCOLTA NOTIZIE DAI FEED RSS (PARALLELA CON TIMEOUT) ---
+2026-11-06 20:04:18,643 - INFO - --- RACCOLTA COMPLETATA: 455 notizie trovate ---
+2026-11-06 20:04:18,643 - INFO - --- FASE 1: GENERAZIONE MASTER PLAN ---
+2026-11-06 20:04:18,647 - INFO - [Master Plan] Chiamata Gemini (gemini-3.8-flash) - Tentativo 1/2...
+2026-11-06 20:04:18,659 - INFO - AFC is enabled with max remote calls: 10.
+2026-11-06 20:04:19,049 - INFO - HTTP Request: POST https://generativelanguage.googleapis.com/v1/models/gemini-3.8-flash:generateContent "HTTP/1.1 429 Too Many Requests"
+2026-11-06 20:04:19,050 - WARNING - [Master Plan] Errore con gemini-3.8-flash (Tentativo 1/2): 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://aistudio.google.com/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \n* Q
+2026-11-06 20:04:19,051 - INFO - Quota giornaliera (20 RPD) esaurita per gemini-3.8-flash, passo immediatamente al modello successivo.
+2026-11-06 20:04:19,051 - INFO - [Master Plan] Chiamata Gemini (gemini-flash-latest) - Tentativo 1/2...
+2026-11-06 20:04:19,051 - INFO - AFC is enabled with max remote calls: 10.
+2026-11-06 20:04:19,315 - INFO - HTTP Request: POST https://generativelanguage.googleapis.com/v1/models/gemini-flash-latest:generateContent "HTTP/1.1 404 Not Found"
+2026-11-06 20:04:19,316 - WARNING - [Master Plan] Errore con gemini-flash-latest (Tentativo 1/2): 404 NOT_FOUND. {'error': {'code': 404, 'message': 'models/gemini-flash-latest is not found for API version v1, or is not supported for generateContent. Call ModelService.ListModels to see the list of available models and their supported methods.', 'status': 'NOT_FOUND'}}
+2026-11-06 20:04:19,316 - INFO - Modello gemini-flash-latest non disponibile/compatibile, passo subito al modello successivo.
+2026-11-06 20:04:19,316 - INFO - [Master Plan] Chiamata Gemini (gemini-3.7-flash) - Tentativo 1/2...
+2026-11-06 20:04:19,317 - INFO - AFC is enabled with max remote calls: 10.
+2026-11-06 20:04:19,589 - INFO - HTTP Request: POST https://generativelanguage.googleapis.com/v1/models/gemini-3.7-flash:generateContent "HTTP/1.1 429 Too Many Requests"
+2026-11-06 20:04:19,590 - WARNING - [Master Plan] Errore con gemini-3.7-flash (Tentativo 1/2): 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://aistudio.google.com/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \n* Q
+2026-11-06 20:04:19,590 - INFO - Quota giornaliera (20 RPD) esaurita per gemini-3.7-flash, passo immediatamente al modello successivo.
+2026-11-06 20:04:19,590 - INFO - [Master Plan] Chiamata Gemini (gemini-3.6-flash) - Tentativo 1/2...
+2026-11-06 20:04:19,590 - INFO - AFC is enabled with max remote calls: 10.
+2026-11-06 20:04:19,897 - INFO - HTTP Request: POST https://generativelanguage.googleapis.com/v1/models/gemini-3.6-flash:generateContent "HTTP/1.1 429 Too Many Requests"
+2026-11-06 20:04:19,898 - WARNING - [Master Plan] Errore con gemini-3.6-flash (Tentativo 1/2): 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://aistudio.google.com/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \n* Q
+2026-11-06 20:04:19,898 - INFO - Quota giornaliera (20 RPD) esaurita per gemini-3.6-flash, passo immediatamente al modello successivo.
+2026-11-06 20:04:19,898 - INFO - [Master Plan] Chiamata Gemini (gemini-3.5-flash) - Tentativo 1/2...
+2026-11-06 20:04:19,898 - INFO - AFC is enabled with max remote calls: 10.
+2026-11-06 20:04:20,203 - INFO - HTTP Request: POST https://generativelanguage.googleapis.com/v1/models/gemini-3.5-flash:generateContent "HTTP/1.1 429 Too Many Requests"
+2026-11-06 20:04:20,204 - WARNING - [Master Plan] Errore con gemini-3.5-flash (Tentativo 1/2): 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://aistudio.google.com/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \n* Q
+2026-11-06 20:04:20,204 - INFO - Quota giornaliera (20 RPD) esaurita per gemini-3.5-flash, passo immediatamente al modello successivo.
+2026-11-06 20:04:20,204 - INFO - [Master Plan] Chiamata Gemini (gemini-flash-lite-latest) - Tentativo 1/2...
+2026-11-06 20:04:20,204 - INFO - AFC is enabled with max remote calls: 10.
+2026-11-06 20:04:20,503 - INFO - HTTP Request: POST https://generativelanguage.googleapis.com/v1/models/gemini-flash-lite-latest:generateContent "HTTP/1.1 404 Not Found"
+2026-11-06 20:04:20,504 - WARNING - [Master Plan] Errore con gemini-flash-lite-latest (Tentativo 1/2): 404 NOT_FOUND. {'error': {'code': 404, 'message': 'models/gemini-flash-lite-latest is not found for API version v1, or is not supported for generateContent. Call ModelService.ListModels to see the list of available models and their supported methods.', 'status': 'NOT_FOUND'}}
+2026-11-06 20:04:20,504 - INFO - Modello gemini-flash-lite-latest non disponibile/compatibile, passo subito al modello successivo.
+2026-11-06 20:04:20,504 - ERROR - Failed to generate Master Plan: Tutti i modelli hanno fallito per Master Plan. Ultimo errore: 404 NOT_FOUND. {'error': {'code': 404, 'message': 'models/gemini-flash-lite-latest is not found for API version v1, or is not supported for generateContent. Call ModelService.ListModels to see the list of available models and their supported methods.', 'status': 'NOT_FOUND'}}
