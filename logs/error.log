@@ -1,116 +1,54 @@
-2026-11-18 20:09:05,548 - INFO - --- INIZIO RACCOLTA NOTIZIE DAI FEED RSS (PARALLELA CON TIMEOUT) ---
-2026-11-18 20:09:07,662 - INFO - --- RACCOLTA COMPLETATA: 458 notizie trovate ---
-2026-11-18 20:09:07,662 - INFO - --- FASE 1: GENERAZIONE MASTER PLAN ---
-2026-11-18 20:09:07,664 - INFO - [Master Plan] Chiamata Gemini (gemini-3.8-flash) - Tentativo 1/2...
-2026-11-18 20:09:07,673 - INFO - AFC is enabled with max remote calls: 10.
-2026-11-18 20:14:06,268 - INFO - HTTP Request: POST https://generativelanguage.googleapis.com/v1/models/gemini-3.8-flash:generateContent "HTTP/1.1 504 Gateway Timeout"
-2026-11-18 20:14:06,269 - WARNING - [Master Plan] Errore con gemini-3.8-flash (Tentativo 1/2): 504 DEADLINE_EXCEEDED. {'error': {'code': 504, 'message': 'Deadline expired before operation could complete.', 'status': 'DEADLINE_EXCEEDED'}}
-2026-11-18 20:14:06,269 - INFO - Attesa di 10s prima di riprovare...
-2026-11-18 20:14:16,269 - INFO - [Master Plan] Chiamata Gemini (gemini-3.8-flash) - Tentativo 2/2...
-2026-11-18 20:14:16,270 - INFO - AFC is enabled with max remote calls: 10.
-2026-11-18 20:19:14,434 - INFO - HTTP Request: POST https://generativelanguage.googleapis.com/v1/models/gemini-3.8-flash:generateContent "HTTP/1.1 504 Gateway Timeout"
-2026-11-18 20:19:14,435 - WARNING - [Master Plan] Errore con gemini-3.8-flash (Tentativo 2/2): 504 DEADLINE_EXCEEDED. {'error': {'code': 504, 'message': 'Deadline expired before operation could complete.', 'status': 'DEADLINE_EXCEEDED'}}
-2026-11-18 20:19:14,435 - INFO - Attesa di 20s prima di riprovare...
-2026-11-18 20:19:34,435 - INFO - [Master Plan] Chiamata Gemini (gemini-flash-latest) - Tentativo 1/2...
-2026-11-18 20:19:34,436 - INFO - AFC is enabled with max remote calls: 10.
-2026-11-18 20:19:34,577 - INFO - HTTP Request: POST https://generativelanguage.googleapis.com/v1/models/gemini-flash-latest:generateContent "HTTP/1.1 404 Not Found"
-2026-11-18 20:19:34,577 - WARNING - [Master Plan] Errore con gemini-flash-latest (Tentativo 1/2): 404 NOT_FOUND. {'error': {'code': 404, 'message': 'models/gemini-flash-latest is not found for API version v1, or is not supported for generateContent. Call ModelService.ListModels to see the list of available models and their supported methods.', 'status': 'NOT_FOUND'}}
-2026-11-18 20:19:34,577 - INFO - Modello gemini-flash-latest non disponibile/compatibile, passo subito al modello successivo.
-2026-11-18 20:19:34,577 - INFO - [Master Plan] Chiamata Gemini (gemini-3.7-flash) - Tentativo 1/2...
-2026-11-18 20:19:34,578 - INFO - AFC is enabled with max remote calls: 10.
-2026-11-18 20:19:34,691 - INFO - HTTP Request: POST https://generativelanguage.googleapis.com/v1/models/gemini-3.7-flash:generateContent "HTTP/1.1 429 Too Many Requests"
-2026-11-18 20:19:34,691 - WARNING - [Master Plan] Errore con gemini-3.7-flash (Tentativo 1/2): 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://aistudio.google.com/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \n* Q
-2026-11-18 20:19:34,691 - INFO - Quota giornaliera (20 RPD) esaurita per gemini-3.7-flash, passo immediatamente al modello successivo.
-2026-11-18 20:19:34,691 - INFO - [Master Plan] Chiamata Gemini (gemini-3.6-flash) - Tentativo 1/2...
-2026-11-18 20:19:34,691 - INFO - AFC is enabled with max remote calls: 10.
-2026-11-18 20:19:37,285 - INFO - HTTP Request: POST https://generativelanguage.googleapis.com/v1/models/gemini-3.6-flash:generateContent "HTTP/1.1 503 Service Unavailable"
-2026-11-18 20:19:37,285 - WARNING - [Master Plan] Errore con gemini-3.6-flash (Tentativo 1/2): 503 UNAVAILABLE. {'error': {'code': 503, 'message': 'This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.', 'status': 'UNAVAILABLE'}}
-2026-11-18 20:19:37,285 - INFO - Attesa di 10s prima di riprovare...
-2026-11-18 20:19:47,285 - INFO - [Master Plan] Chiamata Gemini (gemini-3.6-flash) - Tentativo 2/2...
-2026-11-18 20:19:47,286 - INFO - AFC is enabled with max remote calls: 10.
-2026-11-18 20:19:56,046 - INFO - HTTP Request: POST https://generativelanguage.googleapis.com/v1/models/gemini-3.6-flash:generateContent "HTTP/1.1 503 Service Unavailable"
-2026-11-18 20:19:56,047 - WARNING - [Master Plan] Errore con gemini-3.6-flash (Tentativo 2/2): 503 UNAVAILABLE. {'error': {'code': 503, 'message': 'This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.', 'status': 'UNAVAILABLE'}}
-2026-11-18 20:19:56,047 - INFO - Attesa di 20s prima di riprovare...
-2026-11-18 20:20:16,047 - INFO - [Master Plan] Chiamata Gemini (gemini-3.5-flash) - Tentativo 1/2...
-2026-11-18 20:20:16,048 - INFO - AFC is enabled with max remote calls: 10.
-2026-11-18 20:20:17,467 - INFO - HTTP Request: POST https://generativelanguage.googleapis.com/v1/models/gemini-3.5-flash:generateContent "HTTP/1.1 503 Service Unavailable"
-2026-11-18 20:20:17,467 - WARNING - [Master Plan] Errore con gemini-3.5-flash (Tentativo 1/2): 503 UNAVAILABLE. {'error': {'code': 503, 'message': 'This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.', 'status': 'UNAVAILABLE'}}
-2026-11-18 20:20:17,467 - INFO - Attesa di 10s prima di riprovare...
-2026-11-18 20:20:27,468 - INFO - [Master Plan] Chiamata Gemini (gemini-3.5-flash) - Tentativo 2/2...
-2026-11-18 20:20:27,468 - INFO - AFC is enabled with max remote calls: 10.
-2026-11-18 20:21:52,193 - INFO - HTTP Request: POST https://generativelanguage.googleapis.com/v1/models/gemini-3.5-flash:generateContent "HTTP/1.1 200 OK"
-2026-11-18 20:21:52,202 - INFO - [Master Plan] Completato con successo usando gemini-3.5-flash!
-2026-11-18 20:21:52,203 - INFO - --- FASE 1.5: DOWNLOAD PARALLELO E PARSING SICURO DI 66 FONTI ---
-2026-11-18 20:21:56,538 - INFO - --- SCRAPING COMPLETATO IN SICUREZZA (66 fonti elaborate) ---
-2026-11-18 20:21:56,538 - INFO - --- FASE 2: SCRITTURA BOZZE PER Italia ---
-2026-11-18 20:21:56,539 - INFO - [Categoria Italia] Chiamata Gemini (gemini-3.8-flash) - Tentativo 1/2...
-2026-11-18 20:21:56,539 - INFO - AFC is enabled with max remote calls: 10.
-2026-11-18 20:21:56,657 - INFO - HTTP Request: POST https://generativelanguage.googleapis.com/v1/models/gemini-3.8-flash:generateContent "HTTP/1.1 429 Too Many Requests"
-2026-11-18 20:21:56,658 - WARNING - [Categoria Italia] Errore con gemini-3.8-flash (Tentativo 1/2): 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://aistudio.google.com/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \n* Q
-2026-11-18 20:21:56,658 - INFO - Quota giornaliera (20 RPD) esaurita per gemini-3.8-flash, passo immediatamente al modello successivo.
-2026-11-18 20:21:56,658 - INFO - [Categoria Italia] Chiamata Gemini (gemini-3.6-flash) - Tentativo 1/2...
-2026-11-18 20:21:56,658 - INFO - AFC is enabled with max remote calls: 10.
-2026-11-18 20:22:04,980 - INFO - HTTP Request: POST https://generativelanguage.googleapis.com/v1/models/gemini-3.6-flash:generateContent "HTTP/1.1 503 Service Unavailable"
-2026-11-18 20:22:04,981 - WARNING - [Categoria Italia] Errore con gemini-3.6-flash (Tentativo 1/2): 503 UNAVAILABLE. {'error': {'code': 503, 'message': 'This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.', 'status': 'UNAVAILABLE'}}
-2026-11-18 20:22:04,981 - INFO - Attesa di 10s prima di riprovare...
-2026-11-18 20:22:14,981 - INFO - [Categoria Italia] Chiamata Gemini (gemini-3.6-flash) - Tentativo 2/2...
-2026-11-18 20:22:14,981 - INFO - AFC is enabled with max remote calls: 10.
-2026-11-18 20:22:32,732 - INFO - HTTP Request: POST https://generativelanguage.googleapis.com/v1/models/gemini-3.6-flash:generateContent "HTTP/1.1 503 Service Unavailable"
-2026-11-18 20:22:32,733 - WARNING - [Categoria Italia] Errore con gemini-3.6-flash (Tentativo 2/2): 503 UNAVAILABLE. {'error': {'code': 503, 'message': 'This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.', 'status': 'UNAVAILABLE'}}
-2026-11-18 20:22:32,733 - INFO - Attesa di 20s prima di riprovare...
-2026-11-18 20:22:52,733 - INFO - [Categoria Italia] Chiamata Gemini (gemini-3.5-flash) - Tentativo 1/2...
-2026-11-18 20:22:52,733 - INFO - AFC is enabled with max remote calls: 10.
-2026-11-18 20:22:57,526 - INFO - HTTP Request: POST https://generativelanguage.googleapis.com/v1/models/gemini-3.5-flash:generateContent "HTTP/1.1 503 Service Unavailable"
-2026-11-18 20:22:57,526 - WARNING - [Categoria Italia] Errore con gemini-3.5-flash (Tentativo 1/2): 503 UNAVAILABLE. {'error': {'code': 503, 'message': 'This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.', 'status': 'UNAVAILABLE'}}
-2026-11-18 20:22:57,526 - INFO - Attesa di 10s prima di riprovare...
-2026-11-18 20:23:07,527 - INFO - [Categoria Italia] Chiamata Gemini (gemini-3.5-flash) - Tentativo 2/2...
-2026-11-18 20:23:07,527 - INFO - AFC is enabled with max remote calls: 10.
-2026-11-18 20:23:34,924 - INFO - HTTP Request: POST https://generativelanguage.googleapis.com/v1/models/gemini-3.5-flash:generateContent "HTTP/1.1 503 Service Unavailable"
-2026-11-18 20:23:34,924 - WARNING - [Categoria Italia] Errore con gemini-3.5-flash (Tentativo 2/2): 503 UNAVAILABLE. {'error': {'code': 503, 'message': 'This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.', 'status': 'UNAVAILABLE'}}
-2026-11-18 20:23:34,924 - INFO - Attesa di 20s prima di riprovare...
-2026-11-18 20:23:54,924 - INFO - [Categoria Italia] Chiamata Gemini (gemini-flash-lite-latest) - Tentativo 1/2...
-2026-11-18 20:23:54,925 - INFO - AFC is enabled with max remote calls: 10.
-2026-11-18 20:23:55,043 - INFO - HTTP Request: POST https://generativelanguage.googleapis.com/v1/models/gemini-flash-lite-latest:generateContent "HTTP/1.1 404 Not Found"
-2026-11-18 20:23:55,044 - WARNING - [Categoria Italia] Errore con gemini-flash-lite-latest (Tentativo 1/2): 404 NOT_FOUND. {'error': {'code': 404, 'message': 'models/gemini-flash-lite-latest is not found for API version v1, or is not supported for generateContent. Call ModelService.ListModels to see the list of available models and their supported methods.', 'status': 'NOT_FOUND'}}
-2026-11-18 20:23:55,044 - INFO - Modello gemini-flash-lite-latest non disponibile/compatibile, passo subito al modello successivo.
-2026-11-18 20:23:55,044 - ERROR - Errore scrittura Italia: Tutti i modelli hanno fallito per Categoria Italia. Ultimo errore: 404 NOT_FOUND. {'error': {'code': 404, 'message': 'models/gemini-flash-lite-latest is not found for API version v1, or is not supported for generateContent. Call ModelService.ListModels to see the list of available models and their supported methods.', 'status': 'NOT_FOUND'}}
-2026-11-18 20:23:55,044 - ERROR - ATTENZIONE: Categoria 'Italia' non generata.
-2026-11-18 20:24:07,044 - INFO - --- FASE 2: SCRITTURA BOZZE PER Mondo ---
-2026-11-18 20:24:07,045 - INFO - [Categoria Mondo] Chiamata Gemini (gemini-3.6-flash) - Tentativo 1/2...
-2026-11-18 20:24:07,045 - INFO - AFC is enabled with max remote calls: 10.
-2026-11-18 20:24:16,818 - INFO - HTTP Request: POST https://generativelanguage.googleapis.com/v1/models/gemini-3.6-flash:generateContent "HTTP/1.1 503 Service Unavailable"
-2026-11-18 20:24:16,819 - WARNING - [Categoria Mondo] Errore con gemini-3.6-flash (Tentativo 1/2): 503 UNAVAILABLE. {'error': {'code': 503, 'message': 'This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.', 'status': 'UNAVAILABLE'}}
-2026-11-18 20:24:16,819 - INFO - Attesa di 10s prima di riprovare...
-2026-11-18 20:24:26,819 - INFO - [Categoria Mondo] Chiamata Gemini (gemini-3.6-flash) - Tentativo 2/2...
-2026-11-18 20:24:26,819 - INFO - AFC is enabled with max remote calls: 10.
-2026-11-18 20:24:26,953 - INFO - HTTP Request: POST https://generativelanguage.googleapis.com/v1/models/gemini-3.6-flash:generateContent "HTTP/1.1 429 Too Many Requests"
-2026-11-18 20:24:26,954 - WARNING - [Categoria Mondo] Errore con gemini-3.6-flash (Tentativo 2/2): 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://aistudio.google.com/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \n* Q
-2026-11-18 20:24:26,954 - INFO - Quota giornaliera (20 RPD) esaurita per gemini-3.6-flash, passo immediatamente al modello successivo.
-2026-11-18 20:24:26,954 - INFO - [Categoria Mondo] Chiamata Gemini (gemini-3.5-flash) - Tentativo 1/2...
-2026-11-18 20:24:26,954 - INFO - AFC is enabled with max remote calls: 10.
-2026-11-18 20:24:30,085 - INFO - HTTP Request: POST https://generativelanguage.googleapis.com/v1/models/gemini-3.5-flash:generateContent "HTTP/1.1 503 Service Unavailable"
-2026-11-18 20:24:30,086 - WARNING - [Categoria Mondo] Errore con gemini-3.5-flash (Tentativo 1/2): 503 UNAVAILABLE. {'error': {'code': 503, 'message': 'This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.', 'status': 'UNAVAILABLE'}}
-2026-11-18 20:24:30,086 - INFO - Attesa di 10s prima di riprovare...
-2026-11-18 20:24:40,086 - INFO - [Categoria Mondo] Chiamata Gemini (gemini-3.5-flash) - Tentativo 2/2...
-2026-11-18 20:24:40,086 - INFO - AFC is enabled with max remote calls: 10.
-2026-11-18 20:24:40,193 - INFO - HTTP Request: POST https://generativelanguage.googleapis.com/v1/models/gemini-3.5-flash:generateContent "HTTP/1.1 429 Too Many Requests"
-2026-11-18 20:24:40,194 - WARNING - [Categoria Mondo] Errore con gemini-3.5-flash (Tentativo 2/2): 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://aistudio.google.com/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \n* Q
-2026-11-18 20:24:40,194 - INFO - Quota giornaliera (20 RPD) esaurita per gemini-3.5-flash, passo immediatamente al modello successivo.
-2026-11-18 20:24:40,194 - ERROR - Errore scrittura Mondo: Tutti i modelli hanno fallito per Categoria Mondo. Ultimo errore: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://aistudio.google.com/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 20, model: gemini-3.6-flash, description: Generate content requests per day limit exceeded on Free Tier. See https://aistudio.google.com/docs/rate-limits.\nPlease retry in 11h35m19.834355261s.', 'status': 'RESOURCE_EXHAUSTED', 'details': [{'@type': 'type.googleapis.com/google.rpc.Help', 'links': [{'description': 'Learn more about Gemini API quotas', 'url': 'https://aistudio.google.com/docs/rate-limits'}]}, {'@type': 'type.googleapis.com/google.rpc.QuotaFailure', 'violations': [{'description': 'Generate content requests per day limit exceeded on Free Tier. See https://aistudio.google.com/docs/rate-limits.', 'quotaMetric': 'generativelanguage.googleapis.com/generate_content_free_tier_requests', 'quotaId': 'GenerateRequestsPerDayPerProjectPerModel-FreeTier', 'quotaDimensions': {'location': 'global', 'model': 'gemini-3.6-flash'}, 'quotaValue': '20'}]}, {'@type': 'type.googleapis.com/google.rpc.RetryInfo', 'retryDelay': '41719s'}]}}
-2026-11-18 20:24:40,194 - ERROR - ATTENZIONE: Categoria 'Mondo' non generata.
-2026-11-18 20:24:52,194 - INFO - --- FASE 2: SCRITTURA BOZZE PER Politica ---
-2026-11-18 20:24:52,195 - ERROR - Errore scrittura Politica: Tutti i modelli hanno fallito per Categoria Politica. Ultimo errore: None
-2026-11-18 20:24:52,195 - ERROR - ATTENZIONE: Categoria 'Politica' non generata.
-2026-11-18 20:25:04,195 - INFO - --- FASE 2: SCRITTURA BOZZE PER Economia ---
-2026-11-18 20:25:04,195 - ERROR - Errore scrittura Economia: Tutti i modelli hanno fallito per Categoria Economia. Ultimo errore: None
-2026-11-18 20:25:04,195 - ERROR - ATTENZIONE: Categoria 'Economia' non generata.
-2026-11-18 20:25:16,196 - INFO - --- FASE 2: SCRITTURA BOZZE PER Calcio & Sport ---
-2026-11-18 20:25:16,196 - ERROR - Errore scrittura Calcio & Sport: Tutti i modelli hanno fallito per Categoria Calcio & Sport. Ultimo errore: None
-2026-11-18 20:25:16,196 - ERROR - ATTENZIONE: Categoria 'Calcio & Sport' non generata.
-2026-11-18 20:25:28,196 - INFO - --- FASE 2: SCRITTURA BOZZE PER Attualità ---
-2026-11-18 20:25:28,197 - ERROR - Errore scrittura Attualità: Tutti i modelli hanno fallito per Categoria Attualità. Ultimo errore: None
-2026-11-18 20:25:28,197 - ERROR - ATTENZIONE: Categoria 'Attualità' non generata.
-2026-11-18 20:25:40,197 - INFO - --- FASE 2: SCRITTURA BOZZE PER Scienze e Tecnologia ---
-2026-11-18 20:25:40,198 - ERROR - Errore scrittura Scienze e Tecnologia: Tutti i modelli hanno fallito per Categoria Scienze e Tecnologia. Ultimo errore: None
-2026-11-18 20:25:40,198 - ERROR - ATTENZIONE: Categoria 'Scienze e Tecnologia' non generata.
-2026-11-18 20:25:52,198 - ERROR - Generazione incompleta (0/7 categorie salvate). Mancanti: ['Italia', 'Mondo', 'Politica', 'Economia', 'Calcio & Sport', 'Attualità', 'Scienze e Tecnologia'].
+2026-11-19 08:49:17,780 - INFO - --- INIZIO RACCOLTA NOTIZIE DAI FEED RSS (PARALLELA CON TIMEOUT) ---
+2026-11-19 08:49:20,529 - INFO - --- RACCOLTA COMPLETATA: 459 notizie trovate ---
+2026-11-19 08:49:20,529 - INFO - --- FASE 1: GENERAZIONE MASTER PLAN ---
+2026-11-19 08:49:20,531 - INFO - [Master Plan] Chiamata Gemini (gemini-3.8-flash) - Tentativo 1/2...
+2026-11-19 08:49:20,540 - INFO - AFC is enabled with max remote calls: 10.
+2026-11-19 08:54:18,739 - INFO - HTTP Request: POST https://generativelanguage.googleapis.com/v1/models/gemini-3.8-flash:generateContent "HTTP/1.1 504 Gateway Timeout"
+2026-11-19 08:54:18,740 - WARNING - [Master Plan] Errore con gemini-3.8-flash (Tentativo 1/2): 504 DEADLINE_EXCEEDED. {'error': {'code': 504, 'message': 'Deadline expired before operation could complete.', 'status': 'DEADLINE_EXCEEDED'}}
+2026-11-19 08:54:18,740 - INFO - Attesa di 10s prima di riprovare...
+2026-11-19 08:54:28,740 - INFO - [Master Plan] Chiamata Gemini (gemini-3.8-flash) - Tentativo 2/2...
+2026-11-19 08:54:28,741 - INFO - AFC is enabled with max remote calls: 10.
+2026-11-19 08:59:27,246 - INFO - HTTP Request: POST https://generativelanguage.googleapis.com/v1/models/gemini-3.8-flash:generateContent "HTTP/1.1 504 Gateway Timeout"
+2026-11-19 08:59:27,246 - WARNING - [Master Plan] Errore con gemini-3.8-flash (Tentativo 2/2): 504 DEADLINE_EXCEEDED. {'error': {'code': 504, 'message': 'Deadline expired before operation could complete.', 'status': 'DEADLINE_EXCEEDED'}}
+2026-11-19 08:59:27,246 - INFO - Attesa di 20s prima di riprovare...
+2026-11-19 08:59:47,247 - INFO - [Master Plan] Chiamata Gemini (gemini-flash-latest) - Tentativo 1/2...
+2026-11-19 08:59:47,247 - INFO - AFC is enabled with max remote calls: 10.
+2026-11-19 08:59:47,446 - INFO - HTTP Request: POST https://generativelanguage.googleapis.com/v1/models/gemini-flash-latest:generateContent "HTTP/1.1 404 Not Found"
+2026-11-19 08:59:47,446 - WARNING - [Master Plan] Errore con gemini-flash-latest (Tentativo 1/2): 404 NOT_FOUND. {'error': {'code': 404, 'message': 'models/gemini-flash-latest is not found for API version v1, or is not supported for generateContent. Call ModelService.ListModels to see the list of available models and their supported methods.', 'status': 'NOT_FOUND'}}
+2026-11-19 08:59:47,446 - INFO - Modello gemini-flash-latest non disponibile/compatibile, passo subito al modello successivo.
+2026-11-19 08:59:47,446 - INFO - [Master Plan] Chiamata Gemini (gemini-3.7-flash) - Tentativo 1/2...
+2026-11-19 08:59:47,447 - INFO - AFC is enabled with max remote calls: 10.
+2026-11-19 09:04:25,234 - INFO - HTTP Request: POST https://generativelanguage.googleapis.com/v1/models/gemini-3.7-flash:generateContent "HTTP/1.1 503 Service Unavailable"
+2026-11-19 09:04:25,235 - WARNING - [Master Plan] Errore con gemini-3.7-flash (Tentativo 1/2): 503 UNAVAILABLE. {'error': {'code': 503, 'message': 'This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.', 'status': 'UNAVAILABLE'}}
+2026-11-19 09:04:25,235 - INFO - Attesa di 10s prima di riprovare...
+2026-11-19 09:04:35,235 - INFO - [Master Plan] Chiamata Gemini (gemini-3.7-flash) - Tentativo 2/2...
+2026-11-19 09:04:35,235 - INFO - AFC is enabled with max remote calls: 10.
+2026-11-19 09:09:33,751 - INFO - HTTP Request: POST https://generativelanguage.googleapis.com/v1/models/gemini-3.7-flash:generateContent "HTTP/1.1 504 Gateway Timeout"
+2026-11-19 09:09:33,751 - WARNING - [Master Plan] Errore con gemini-3.7-flash (Tentativo 2/2): 504 DEADLINE_EXCEEDED. {'error': {'code': 504, 'message': 'Deadline expired before operation could complete.', 'status': 'DEADLINE_EXCEEDED'}}
+2026-11-19 09:09:33,751 - INFO - Attesa di 20s prima di riprovare...
+2026-11-19 09:09:53,751 - INFO - [Master Plan] Chiamata Gemini (gemini-3.6-flash) - Tentativo 1/2...
+2026-11-19 09:09:53,752 - INFO - AFC is enabled with max remote calls: 10.
+2026-11-19 09:10:03,236 - INFO - HTTP Request: POST https://generativelanguage.googleapis.com/v1/models/gemini-3.6-flash:generateContent "HTTP/1.1 503 Service Unavailable"
+2026-11-19 09:10:03,237 - WARNING - [Master Plan] Errore con gemini-3.6-flash (Tentativo 1/2): 503 UNAVAILABLE. {'error': {'code': 503, 'message': 'This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.', 'status': 'UNAVAILABLE'}}
+2026-11-19 09:10:03,237 - INFO - Attesa di 10s prima di riprovare...
+2026-11-19 09:10:13,237 - INFO - [Master Plan] Chiamata Gemini (gemini-3.6-flash) - Tentativo 2/2...
+2026-11-19 09:10:13,237 - INFO - AFC is enabled with max remote calls: 10.
+2026-11-19 09:15:12,941 - INFO - HTTP Request: POST https://generativelanguage.googleapis.com/v1/models/gemini-3.6-flash:generateContent "HTTP/1.1 504 Gateway Timeout"
+2026-11-19 09:15:12,942 - WARNING - [Master Plan] Errore con gemini-3.6-flash (Tentativo 2/2): 504 DEADLINE_EXCEEDED. {'error': {'code': 504, 'message': 'Deadline expired before operation could complete.', 'status': 'DEADLINE_EXCEEDED'}}
+2026-11-19 09:15:12,942 - INFO - Attesa di 20s prima di riprovare...
+2026-11-19 09:15:32,942 - INFO - [Master Plan] Chiamata Gemini (gemini-3.5-flash) - Tentativo 1/2...
+2026-11-19 09:15:32,942 - INFO - AFC is enabled with max remote calls: 10.
+2026-11-19 09:20:32,152 - INFO - HTTP Request: POST https://generativelanguage.googleapis.com/v1/models/gemini-3.5-flash:generateContent "HTTP/1.1 504 Gateway Timeout"
+2026-11-19 09:20:32,153 - WARNING - [Master Plan] Errore con gemini-3.5-flash (Tentativo 1/2): 504 DEADLINE_EXCEEDED. {'error': {'code': 504, 'message': 'Deadline expired before operation could complete.', 'status': 'DEADLINE_EXCEEDED'}}
+2026-11-19 09:20:32,153 - INFO - Attesa di 10s prima di riprovare...
+2026-11-19 09:20:42,153 - INFO - [Master Plan] Chiamata Gemini (gemini-3.5-flash) - Tentativo 2/2...
+2026-11-19 09:20:42,154 - INFO - AFC is enabled with max remote calls: 10.
+2026-11-19 09:20:43,772 - INFO - HTTP Request: POST https://generativelanguage.googleapis.com/v1/models/gemini-3.5-flash:generateContent "HTTP/1.1 503 Service Unavailable"
+2026-11-19 09:20:43,773 - WARNING - [Master Plan] Errore con gemini-3.5-flash (Tentativo 2/2): 503 UNAVAILABLE. {'error': {'code': 503, 'message': 'This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.', 'status': 'UNAVAILABLE'}}
+2026-11-19 09:20:43,773 - INFO - Attesa di 20s prima di riprovare...
+2026-11-19 09:21:03,773 - INFO - [Master Plan] Chiamata Gemini (gemini-flash-lite-latest) - Tentativo 1/2...
+2026-11-19 09:21:03,773 - INFO - AFC is enabled with max remote calls: 10.
+2026-11-19 09:21:03,963 - INFO - HTTP Request: POST https://generativelanguage.googleapis.com/v1/models/gemini-flash-lite-latest:generateContent "HTTP/1.1 404 Not Found"
+2026-11-19 09:21:03,964 - WARNING - [Master Plan] Errore con gemini-flash-lite-latest (Tentativo 1/2): 404 NOT_FOUND. {'error': {'code': 404, 'message': 'models/gemini-flash-lite-latest is not found for API version v1, or is not supported for generateContent. Call ModelService.ListModels to see the list of available models and their supported methods.', 'status': 'NOT_FOUND'}}
+2026-11-19 09:21:03,964 - INFO - Modello gemini-flash-lite-latest non disponibile/compatibile, passo subito al modello successivo.
+2026-11-19 09:21:03,964 - ERROR - Failed to generate Master Plan: Tutti i modelli hanno fallito per Master Plan. Ultimo errore: 404 NOT_FOUND. {'error': {'code': 404, 'message': 'models/gemini-flash-lite-latest is not found for API version v1, or is not supported for generateContent. Call ModelService.ListModels to see the list of available models and their supported methods.', 'status': 'NOT_FOUND'}}
